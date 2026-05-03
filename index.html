@@ -3,32 +3,105 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-  <title>Tenant Information</title>
+  <title>Tenant Onboarding</title>
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#F0F2FA;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px 60px}
     .wrap{width:100%;max-width:480px}
+
+    /* Hero */
     .hero{background:linear-gradient(135deg,#4361EE 0%,#6C63FF 100%);border-radius:24px;padding:28px 24px 24px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden}
     .hero::before{content:'';position:absolute;width:160px;height:160px;border-radius:80px;background:rgba(255,255,255,.08);top:-40px;right:-30px;pointer-events:none}
     .hero::after{content:'';position:absolute;width:100px;height:100px;border-radius:50px;background:rgba(255,255,255,.05);bottom:-20px;left:20px;pointer-events:none}
     .hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;opacity:.7;text-transform:uppercase;margin-bottom:6px}
-    .hero-title{font-size:26px;font-weight:900;line-height:1.2;margin-bottom:4px}
+    .hero-title{font-size:24px;font-weight:900;line-height:1.2;margin-bottom:4px}
     .hero-loc{font-size:14px;opacity:.75;margin-bottom:18px}
     .rent-chip{display:inline-flex;align-items:center;background:rgba(255,255,255,.2);border-radius:30px;padding:8px 20px;font-size:22px;font-weight:900;letter-spacing:-.5px}
+
+    /* Step progress */
+    .steps{display:flex;align-items:center;margin-bottom:20px;padding:0 4px}
+    .step-item{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+    .step-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:#E8EAF2;z-index:0}
+    .step-item.done::after,.step-item.active::after{background:#4361EE}
+    .step-dot{width:28px;height:28px;border-radius:14px;background:#E8EAF2;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#9CA3AF;z-index:1;position:relative}
+    .step-item.active .step-dot{background:#4361EE;color:#fff}
+    .step-item.done .step-dot{background:#2DC98E;color:#fff}
+    .step-label{font-size:10px;font-weight:700;color:#9CA3AF;margin-top:5px;text-align:center}
+    .step-item.active .step-label{color:#4361EE}
+    .step-item.done .step-label{color:#2DC98E}
+
+    /* Cards */
     .card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 2px 20px rgba(67,97,238,.08)}
     .card-title{font-size:13px;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:20px}
+
+    /* Fields */
     .field{margin-bottom:18px}
     .field:last-child{margin-bottom:0}
     .field label{display:block;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-    .field input{display:block;width:100%;background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;outline:none;-webkit-appearance:none;transition:border-color .15s}
-    .field input:focus{border-color:#4361EE;background:#fff}
+    .field input,.field select{display:block;width:100%;background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;outline:none;-webkit-appearance:none;transition:border-color .15s;font-family:inherit}
+    .field input:focus,.field select:focus{border-color:#4361EE;background:#fff}
     .field input::placeholder{color:#C4C9D4}
-    .err-msg{display:none;color:#EF4444;font-size:13px;font-weight:600;margin-top:10px;padding:10px 14px;background:#FEE2E2;border-radius:10px}
+    .field-hint{font-size:11px;color:#9CA3AF;margin-top:6px;line-height:1.5}
+    .field-optional{font-size:10px;font-weight:600;color:#9CA3AF;margin-left:6px;text-transform:none;letter-spacing:0}
+
+    /* Payment method cards */
+    .pay-methods{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+    .pay-method{border:2px solid #E8EAF2;border-radius:14px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:12px}
+    .pay-method.selected{border-color:#4361EE;background:#EEF1FD}
+    .pay-method-icon{font-size:22px;flex-shrink:0}
+    .pay-method-info{flex:1}
+    .pay-method-name{font-size:14px;font-weight:700;color:#1A1D2E}
+    .pay-method-desc{font-size:12px;color:#6B7280;margin-top:2px}
+    .pay-method-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;flex-shrink:0}
+    .badge-free{background:#E8FAF3;color:#059669}
+    .badge-instant{background:#EEF1FD;color:#4361EE}
+    .badge-fee{background:#FEF3C7;color:#B45309}
+
+    /* Auto-pay info box */
+    .autopay-box{background:#EEF1FD;border-radius:14px;padding:16px;margin-bottom:18px}
+    .autopay-box-title{font-size:13px;font-weight:800;color:#4361EE;margin-bottom:8px}
+    .autopay-row{font-size:13px;color:#1A1D2E;line-height:20px;margin-bottom:4px;display:flex;gap:8px}
+    .autopay-row span:first-child{flex-shrink:0}
+
+    /* Date picker inputs */
+    .field input[type="date"]{background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;width:100%;display:block;outline:none;-webkit-appearance:none;font-family:inherit;min-height:54px}
+    .field input[type="date"]:focus{border-color:#4361EE;background:#fff}
+    .date-wrap{position:relative}
+    .date-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:20px;pointer-events:none}
+    .date-placeholder{font-size:14px;color:#9CA3AF;margin-top:6px}
+
+    /* Stripe element */
+    #payment-element-wrap{background:#F0F2FA;border-radius:14px;padding:16px;margin-bottom:18px;min-height:60px}
+    #payment-element-wrap.loading{display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:14px;gap:8px}
+
+    /* Lease summary table */
+    .lease-summary{width:100%;border-collapse:collapse;margin-bottom:20px}
+    .lease-summary td{padding:10px 0;border-bottom:1px solid #F0F2FA;font-size:14px;vertical-align:top}
+    .lease-summary td:first-child{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;padding-right:12px;white-space:nowrap}
+    .lease-summary td:last-child{color:#1A1D2E;font-weight:600;text-align:right}
+
+    /* DocuSign button */
+    .btn-docusign{background:#1A1D2E;color:#fff;border-radius:18px;padding:19px 24px;font-size:17px;font-weight:800;width:100%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;transition:opacity .2s;font-family:inherit}
+    .btn-docusign:disabled{opacity:.55;cursor:not-allowed}
+    .btn-docusign:active:not(:disabled){opacity:.85}
+    .ds-logo{font-size:20px}
+
+    /* Buttons */
+    .btn{display:block;width:100%;border:none;border-radius:18px;padding:19px 24px;font-size:17px;font-weight:800;cursor:pointer;text-align:center;transition:opacity .2s,transform .1s;-webkit-appearance:none;margin-bottom:12px;font-family:inherit}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn:active:not(:disabled){transform:scale(.98)}
+    .btn-primary{background:#4361EE;color:#fff}
+    .btn-secondary{background:#fff;color:#4361EE;border:2px solid #4361EE}
+
+    /* Error */
+    .err-msg{display:none;color:#EF4444;font-size:13px;font-weight:600;margin-top:10px;margin-bottom:4px;padding:10px 14px;background:#FEE2E2;border-radius:10px}
     .err-msg.on{display:block}
-    .submit-btn{display:block;width:100%;background:#4361EE;color:#fff;border:none;border-radius:18px;padding:19px 24px;font-size:17px;font-weight:800;cursor:pointer;text-align:center;transition:opacity .2s,transform .1s;-webkit-appearance:none;margin-bottom:12px}
-    .submit-btn:disabled{opacity:.55;cursor:not-allowed}
-    .submit-btn:active:not(:disabled){transform:scale(.98)}
-    .secure-note{text-align:center;color:#9CA3AF;font-size:12px;line-height:1.5}
+
+    /* Secure note */
+    .secure-note{text-align:center;color:#9CA3AF;font-size:12px;line-height:1.5;margin-top:4px}
+
+    /* Success / Error / Loading views */
     .success{display:none;text-align:center;padding:60px 20px}
     .success.on{display:block}
     .success-icon{font-size:80px;margin-bottom:20px}
@@ -39,12 +112,15 @@
     .error-title{font-size:22px;font-weight:900;color:#1A1D2E;margin-bottom:10px}
     .error-body{color:#6B7280;font-size:15px;line-height:1.6}
     .loading{text-align:center;padding:60px 20px;color:#6B7280;font-size:16px}
-    #main{display:none}
+
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
   </style>
 </head>
 <body>
 <div class="wrap">
   <div id="loading" class="loading">Loading your invite…</div>
+
   <div id="error-view" class="error-page" style="display:none">
     <div class="error-icon">🔗</div>
     <div class="error-title">Link Unavailable</div>
@@ -52,15 +128,37 @@
   </div>
 
   <div id="main" style="display:none">
-    <!-- Form view -->
-    <div id="form-view">
-      <div class="hero">
-        <div class="hero-eyebrow">Tenant Onboarding</div>
-        <div class="hero-title">Welcome!</div>
-        <div id="hero-loc" class="hero-loc"></div>
-        <div id="rent-chip" class="rent-chip"></div>
-      </div>
 
+    <!-- Step progress: 4 steps -->
+    <div class="steps" id="step-bar">
+      <div class="step-item active" id="step-1-item">
+        <div class="step-dot" id="dot-1">1</div>
+        <div class="step-label">Info</div>
+      </div>
+      <div class="step-item" id="step-2-item">
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-label">Lease</div>
+      </div>
+      <div class="step-item" id="step-3-item">
+        <div class="step-dot" id="dot-3">3</div>
+        <div class="step-label">Payment</div>
+      </div>
+      <div class="step-item" id="step-4-item">
+        <div class="step-dot" id="dot-4">4</div>
+        <div class="step-label">Sign</div>
+      </div>
+    </div>
+
+    <!-- Hero (always visible once loaded) -->
+    <div class="hero">
+      <div class="hero-eyebrow">Tenant Onboarding</div>
+      <div class="hero-title" id="hero-title">Welcome!</div>
+      <div id="hero-loc" class="hero-loc"></div>
+      <div id="rent-chip" class="rent-chip"></div>
+    </div>
+
+    <!-- ── STEP 1: Your Information ── -->
+    <div id="step1">
       <div class="card">
         <div class="card-title">Your Information</div>
 
@@ -68,121 +166,521 @@
           <label for="name">Full Name</label>
           <input id="name" type="text" placeholder="Jane Smith" autocomplete="name" inputmode="text"/>
         </div>
-
         <div class="field">
           <label for="email">Email Address</label>
           <input id="email" type="email" placeholder="jane@example.com" autocomplete="email" inputmode="email"/>
         </div>
-
         <div class="field">
           <label for="phone">Phone Number</label>
           <input id="phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel"/>
+          <div class="field-hint">Used for payment reminders and maintenance notifications.</div>
         </div>
 
-        <div id="err-msg" class="err-msg"></div>
+        <div id="err1" class="err-msg"></div>
       </div>
 
-      <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">
-        Submit My Information
-      </button>
+      <button class="btn btn-primary" id="btn1" onclick="goStep2()">Next: Lease Details →</button>
       <div class="secure-note">🔒 Your information is sent securely to your landlord.</div>
     </div>
 
-    <!-- Success view -->
-    <div class="success" id="success-view">
-      <div class="success-icon">✅</div>
-      <div class="success-title">You're all set!</div>
-      <div class="success-body">
-        Your information has been saved.<br/>
-        Your landlord will be in touch soon.<br/><br/>
-        You may close this page.
+    <!-- ── STEP 2: Lease Dates ── -->
+    <div id="step2" style="display:none">
+      <div class="card">
+        <div class="card-title">Your Lease</div>
+
+        <div class="field">
+          <label for="lease-start">Lease Start Date</label>
+          <div class="date-wrap">
+            <input id="lease-start" type="date"/>
+            <span class="date-icon">📅</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="lease-end">Lease End Date <span class="field-optional">(optional)</span></label>
+          <div class="date-wrap">
+            <input id="lease-end" type="date"/>
+            <span class="date-icon">📅</span>
+          </div>
+          <div class="field-hint">Leave blank for month-to-month leases.</div>
+        </div>
+
+        <div id="err2" class="err-msg"></div>
       </div>
+
+      <button class="btn btn-primary" id="btn2" onclick="goStep3()">Next: Set Up Auto-Pay →</button>
+      <button class="btn btn-secondary" onclick="goBack(1)">← Back</button>
     </div>
-  </div>
+
+    <!-- ── STEP 3: Payment Setup ── -->
+    <div id="step3" style="display:none">
+      <div class="card">
+        <div class="card-title">Auto-Pay Setup</div>
+
+        <div class="autopay-box">
+          <div class="autopay-box-title">📅 How automatic payments work</div>
+          <div class="autopay-row"><span>✅</span><span>Your rent is charged automatically on the <strong>1st of each month</strong></span></div>
+          <div class="autopay-row"><span>⏳</span><span>Grace period until the <strong>5th</strong> — no penalty if processed within 5 days</span></div>
+          <div class="autopay-row"><span>🔄</span><span>If bank transfer fails, your <strong>debit card is charged as backup</strong></span></div>
+          <div class="autopay-row"><span>📱</span><span>You'll receive a <strong>text and email</strong> for every payment or issue</span></div>
+        </div>
+
+        <div class="card-title" style="margin-top:4px">Choose Payment Method</div>
+
+        <div class="pay-methods">
+          <div class="pay-method selected" id="pm-bank" onclick="selectPayMethod('bank')">
+            <div class="pay-method-icon">🏦</div>
+            <div class="pay-method-info">
+              <div class="pay-method-name">Bank Transfer (ACH)</div>
+              <div class="pay-method-desc">Direct from your checking or savings</div>
+            </div>
+            <div class="pay-method-badge badge-free">FREE</div>
+          </div>
+          <div class="pay-method" id="pm-debit" onclick="selectPayMethod('debit')">
+            <div class="pay-method-icon">💳</div>
+            <div class="pay-method-info">
+              <div class="pay-method-name">Debit Card</div>
+              <div class="pay-method-desc">Visa, Mastercard, Discover debit</div>
+            </div>
+            <div class="pay-method-badge badge-instant">INSTANT</div>
+          </div>
+          <div class="pay-method" id="pm-credit" onclick="selectPayMethod('credit')">
+            <div class="pay-method-icon">💳</div>
+            <div class="pay-method-info">
+              <div class="pay-method-name">Credit Card</div>
+              <div class="pay-method-desc">2.9% + $0.30 processing fee applies</div>
+            </div>
+            <div class="pay-method-badge badge-fee">+FEE</div>
+          </div>
+        </div>
+
+        <div id="payment-element-wrap" class="loading" style="display:none">
+          <div class="spinner"></div> Loading secure payment form…
+        </div>
+        <div id="payment-element"></div>
+
+        <div id="err3" class="err-msg"></div>
+      </div>
+
+      <button class="btn btn-primary" id="btn3-init" onclick="initPayment()">Continue to Payment →</button>
+      <button class="btn btn-primary" id="btn3-confirm" style="display:none" onclick="confirmPayment()">Authorize Auto-Pay 🔒</button>
+      <button class="btn btn-secondary" onclick="goBack(2)">← Back</button>
+      <div class="secure-note">🔒 Payments processed securely by Stripe. Your landlord never sees your card number.</div>
+    </div>
+
+    <!-- ── STEP 4: Sign Lease ── -->
+    <div id="step4" style="display:none">
+      <div class="card">
+        <div class="card-title">Review &amp; Sign Your Lease</div>
+
+        <table id="lease-summary" class="lease-summary"></table>
+
+        <p style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:20px">
+          By signing electronically you confirm you have read and agree to all lease terms.
+          Your e-signature is legally binding under the ESIGN Act.
+        </p>
+
+        <div id="err4" class="err-msg"></div>
+      </div>
+
+      <button class="btn-docusign" id="btn4" onclick="startSigning()">
+        <span class="ds-logo">✍️</span> Sign Lease with DocuSign
+      </button>
+      <div class="secure-note">🔒 Powered by DocuSign — the world's #1 e-signature platform.</div>
+    </div>
+
+    <!-- ── Success ── -->
+    <div class="success" id="success-view">
+      <div class="success-icon">🎉</div>
+      <div class="success-title" id="success-title">You're all set!</div>
+      <div class="success-body" id="success-body"></div>
+    </div>
+
+  </div><!-- #main -->
 </div>
 
 <script>
-  var API_BASE = 'https://iykkkfcwuparqtomyaow.supabase.co/functions/v1/tenant-onboarding';
-  var token    = new URLSearchParams(window.location.search).get('token') || '';
-  var busy     = false;
+var API_BASE = 'https://iykkkfcwuparqtomyaow.supabase.co/functions/v1/tenant-onboarding';
+var token    = new URLSearchParams(window.location.search).get('token') || '';
+var busy     = false;
+var stripe   = null;
+var elements = null;
+var inviteInfo = {};
+var selectedPayMethod = 'bank';
 
-  function showError(msg) {
-    document.getElementById('loading').style.display    = 'none';
-    document.getElementById('main').style.display       = 'none';
-    document.getElementById('error-body').textContent   = msg;
-    document.getElementById('error-view').style.display = 'block';
+// ── Utilities ─────────────────────────────────────────────────
+
+function showError(msg) {
+  document.getElementById('loading').style.display    = 'none';
+  document.getElementById('main').style.display       = 'none';
+  document.getElementById('error-body').textContent   = msg;
+  document.getElementById('error-view').style.display = 'block';
+}
+
+function setErr(id, msg) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.toggle('on', !!msg);
+}
+
+function setBtn(id, disabled, html) {
+  var btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = disabled;
+  if (html != null) btn.innerHTML = html;
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  var d = new Date(str + 'T00:00:00');
+  return isNaN(d) ? str : d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+// ── Step navigation ───────────────────────────────────────────
+
+function updateSteps(active) {
+  for (var i = 1; i <= 4; i++) {
+    var item = document.getElementById('step-' + i + '-item');
+    var dot  = document.getElementById('dot-' + i);
+    if (!item) continue;
+    item.className = 'step-item' + (i < active ? ' done' : i === active ? ' active' : '');
+    dot.textContent = i < active ? '✓' : String(i);
   }
+}
 
-  function showForm(info) {
-    document.getElementById('loading').style.display = 'none';
-    var rentFmt  = '$' + Number(info.rent).toLocaleString('en-US');
-    var location = info.buildingName
-      ? info.buildingName + ' · Unit ' + info.unitNumber
-      : 'Unit ' + info.unitNumber;
-    document.getElementById('hero-loc').textContent   = location;
-    document.getElementById('rent-chip').textContent  = rentFmt + '/mo';
-    document.getElementById('main').style.display     = 'block';
+function showStep(n) {
+  for (var i = 1; i <= 4; i++) {
+    document.getElementById('step' + i).style.display = (n === i) ? '' : 'none';
   }
+  updateSteps(n);
+  window.scrollTo(0, 0);
+}
 
-  async function loadInvite() {
-    if (!token) { showError('No invite token was provided in this link.'); return; }
-    try {
-      var res  = await fetch(API_BASE + '?action=info&token=' + encodeURIComponent(token));
-      var json = await res.json();
-      if (json.error) { showError(json.error); return; }
-      showForm(json);
-    } catch (e) {
-      showError('Unable to load this invite. Please check your connection and try again.');
-    }
-  }
+function goBack(n) { showStep(n); }
 
-  async function handleSubmit() {
-    if (busy) return;
-    var name  = document.getElementById('name').value.trim();
-    var email = document.getElementById('email').value.trim();
-    var phone = document.getElementById('phone').value.trim();
-    var errEl = document.getElementById('err-msg');
-    errEl.classList.remove('on');
+function goStep2() {
+  setErr('err1', '');
+  var name  = document.getElementById('name').value.trim();
+  var email = document.getElementById('email').value.trim();
+  if (!name)  { setErr('err1', 'Please enter your full name.'); document.getElementById('name').focus(); return; }
+  if (!email || !email.includes('@')) { setErr('err1', 'Please enter a valid email address.'); document.getElementById('email').focus(); return; }
+  showStep(2);
+}
 
-    if (!name) {
-      errEl.textContent = 'Please enter your full name.';
-      errEl.classList.add('on');
-      document.getElementById('name').focus();
+function goStep3() {
+  setErr('err2', '');
+  showStep(3);
+}
+
+function selectPayMethod(method) {
+  selectedPayMethod = method;
+  ['bank','debit','credit'].forEach(function(m) {
+    document.getElementById('pm-' + m).classList.toggle('selected', m === method);
+  });
+}
+
+// ── Load invite (entry point) ────────────────────────────────
+
+async function loadInvite() {
+  var params = new URLSearchParams(window.location.search);
+
+  // ── Returning from DocuSign signing ──
+  var dsEvent = params.get('event');
+  if (dsEvent && params.get('token')) {
+    token = params.get('token');
+    if (dsEvent === 'signing_complete') {
+      document.getElementById('loading').innerHTML = '<span class="spinner"></span> Saving your signed lease…';
+      try {
+        await callSigningComplete();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main').style.display    = 'block';
+        document.getElementById('step-bar').style.display = 'none';
+        showSuccess(true, true);
+      } catch (e) {
+        showError('Could not save your signed lease: ' + e.message + '\nPlease contact your landlord.');
+      }
       return;
     }
-    if (!email || !email.includes('@')) {
-      errEl.textContent = 'Please enter a valid email address.';
-      errEl.classList.add('on');
-      document.getElementById('email').focus();
+    if (dsEvent === 'cancel' || dsEvent === 'decline') {
+      // Reload form at step 4 so they can try again
+      await loadFormAndShowStep(4, 'You cancelled signing. Please try again when ready.');
       return;
     }
+    showError('Signing session ended. Please use your original invite link to try again.');
+    return;
+  }
 
-    busy = true;
-    var btn = document.getElementById('submit-btn');
-    btn.disabled    = true;
-    btn.textContent = 'Saving…';
-
+  // ── Returning from Stripe bank redirect ──
+  var setupIntent = params.get('setup_intent');
+  if (setupIntent && token) {
+    document.getElementById('loading').innerHTML = '<span class="spinner"></span> Completing your setup…';
     try {
-      var res  = await fetch(API_BASE + '?action=submit', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ token: token, name: name, email: email, phone: phone }),
+      await loadFormData();                          // render hero
+      var payRes  = await fetch(API_BASE + '?action=confirm-payment', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token, setup_intent_id: setupIntent }),
       });
-      var json = await res.json();
-      if (json.error) throw new Error(json.error);
-
-      document.getElementById('form-view').style.display   = 'none';
-      document.getElementById('success-view').classList.add('on');
-    } catch (err) {
-      errEl.textContent = err.message || 'Something went wrong. Please try again.';
-      errEl.classList.add('on');
-      btn.disabled    = false;
-      btn.textContent = 'Submit My Information';
-      busy = false;
+      var payJson = await payRes.json();
+      if (payJson.error) throw new Error(payJson.error);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main').style.display    = 'block';
+      if (payJson.hasDocuSign) {
+        buildLeaseSummary();
+        showStep(4);
+      } else {
+        showSuccess(true, false);
+      }
+    } catch (e) {
+      showError('Could not complete payment setup: ' + e.message);
     }
+    return;
   }
 
-  loadInvite();
+  // ── Normal first load ──
+  if (!token) { showError('No invite token was provided in this link.'); return; }
+  try {
+    var json = await loadFormData();
+    showFormUI(json);
+    showStep(1);
+  } catch (e) {
+    showError('Unable to load this invite. Please check your connection and try again.');
+  }
+}
+
+async function loadFormData() {
+  var res  = await fetch(API_BASE + '?action=info&token=' + encodeURIComponent(token));
+  var json = await res.json();
+  if (json.error) throw new Error(json.error);
+  inviteInfo = json;
+  return json;
+}
+
+async function loadFormAndShowStep(stepN, errMsg) {
+  try {
+    var json = await loadFormData();
+    showFormUI(json);
+    if (errMsg && stepN === 4) {
+      buildLeaseSummary();
+      setErr('err4', errMsg);
+    }
+    showStep(stepN);
+  } catch (e) {
+    showError(e.message);
+  }
+}
+
+function showFormUI(info) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main').style.display    = 'block';
+
+  var loc = info.buildingName
+    ? info.buildingName + ' · Unit ' + info.unitNumber
+    : 'Unit ' + info.unitNumber;
+  document.getElementById('hero-loc').textContent  = loc;
+  document.getElementById('rent-chip').textContent = '$' + Number(info.rent).toLocaleString('en-US') + '/mo';
+
+  if (info.landlordName) {
+    document.getElementById('hero-title').textContent = 'Hi from ' + info.landlordName + '!';
+  }
+  if (info.stripePublishableKey) stripe = Stripe(info.stripePublishableKey);
+}
+
+// ── Lease summary card (step 4) ───────────────────────────────
+
+function buildLeaseSummary() {
+  var name       = document.getElementById('name').value.trim();
+  var leaseStart = document.getElementById('lease-start').value;
+  var leaseEnd   = document.getElementById('lease-end').value;
+
+  var rows = [
+    ['Property', (inviteInfo.buildingName || '') + (inviteInfo.buildingName ? ' · Unit ' + inviteInfo.unitNumber : 'Unit ' + inviteInfo.unitNumber)],
+    ['Tenant',   name || '—'],
+    ['Rent',     '$' + Number(inviteInfo.rent).toLocaleString('en-US') + ' / month'],
+  ];
+  if (leaseStart) rows.push(['Lease Start', formatDate(leaseStart)]);
+  if (leaseEnd)   rows.push(['Lease End',   formatDate(leaseEnd)]);
+  else            rows.push(['Term',        'Month-to-month']);
+
+  document.getElementById('lease-summary').innerHTML = rows.map(function(r) {
+    return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+  }).join('');
+}
+
+// ── Step 3: Init Stripe payment ───────────────────────────────
+
+async function initPayment() {
+  if (busy) return;
+  setErr('err3', '');
+
+  var name       = document.getElementById('name').value.trim();
+  var email      = document.getElementById('email').value.trim();
+  var phone      = document.getElementById('phone').value.trim();
+  var leaseStart = document.getElementById('lease-start').value;
+  var leaseEnd   = document.getElementById('lease-end').value;
+
+  busy = true;
+  setBtn('btn3-init', true, '<span class="spinner"></span> Setting up…');
+
+  try {
+    var res  = await fetch(API_BASE + '?action=submit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token, name: name, email: email, phone: phone, lease_start: leaseStart, lease_end: leaseEnd }),
+    });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+
+    // No Stripe configured
+    if (json.success && !json.clientSecret) {
+      if (json.hasDocuSign) {
+        buildLeaseSummary();
+        showStep(4);
+      } else {
+        showSuccess(false, false);
+      }
+      return;
+    }
+
+    // Init Stripe Elements
+    if (!stripe && json.publishableKey) stripe = Stripe(json.publishableKey);
+    if (!stripe) throw new Error('Payment system not configured. Contact your landlord.');
+
+    var wrap = document.getElementById('payment-element-wrap');
+    wrap.style.display = 'flex';
+    wrap.className     = 'loading';
+    wrap.innerHTML     = '<div class="spinner"></div> Loading secure payment form…';
+
+    elements = stripe.elements({
+      clientSecret: json.clientSecret,
+      appearance:   { theme: 'stripe', variables: { colorPrimary: '#4361EE', borderRadius: '14px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' } },
+    });
+
+    var paymentElement = elements.create('payment', {
+      layout: 'tabs',
+      defaultValues: { billingDetails: { name: name, email: email, phone: phone } },
+    });
+
+    wrap.className = '';
+    wrap.innerHTML = '';
+    paymentElement.mount('#payment-element');
+
+    document.getElementById('btn3-init').style.display    = 'none';
+    document.getElementById('btn3-confirm').style.display = '';
+  } catch (err) {
+    setErr('err3', err.message || 'Could not initialize payment. Please try again.');
+    setBtn('btn3-init', false, 'Continue to Payment →');
+  } finally {
+    busy = false;
+  }
+}
+
+async function confirmPayment() {
+  if (busy || !stripe || !elements) return;
+  busy = true;
+  setBtn('btn3-confirm', true, '<span class="spinner"></span> Authorizing…');
+  setErr('err3', '');
+
+  var returnUrl = window.location.origin + window.location.pathname +
+    '?token=' + encodeURIComponent(token) +
+    '&setup_intent={setup_intent}&setup_intent_client_secret={setup_intent_client_secret}';
+
+  try {
+    var result = await stripe.confirmSetup({
+      elements:      elements,
+      redirect:      'if_required',
+      confirmParams: { return_url: returnUrl },
+    });
+
+    if (result.error) throw new Error(result.error.message);
+
+    if (result.setupIntent && result.setupIntent.status === 'succeeded') {
+      await callConfirmPayment(result.setupIntent.id);
+    }
+  } catch (err) {
+    setErr('err3', err.message || 'Could not set up payment. Please try again.');
+    setBtn('btn3-confirm', false, 'Authorize Auto-Pay 🔒');
+    busy = false;
+  }
+}
+
+async function callConfirmPayment(setupIntentId) {
+  var res  = await fetch(API_BASE + '?action=confirm-payment', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, setup_intent_id: setupIntentId }),
+  });
+  var json = await res.json();
+  if (json.error) throw new Error(json.error);
+
+  if (json.hasDocuSign) {
+    buildLeaseSummary();
+    showStep(4);
+  } else {
+    showSuccess(true, false);
+  }
+}
+
+// ── Step 4: DocuSign signing ──────────────────────────────────
+
+async function startSigning() {
+  if (busy) return;
+  busy = true;
+  setBtn('btn4', true, '<span class="spinner"></span> Preparing lease document…');
+  setErr('err4', '');
+
+  try {
+    var res  = await fetch(API_BASE + '?action=get-signing-url', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token }),
+    });
+    var json = await res.json();
+
+    if (json.noDocuSign) {
+      // DocuSign not configured — complete without signing
+      await callSigningComplete();
+      showSuccess(true, false);
+      return;
+    }
+
+    if (json.error) throw new Error(json.error);
+
+    // Redirect to DocuSign — page returns with ?event=signing_complete
+    window.location.href = json.signingUrl;
+  } catch (err) {
+    setErr('err4', err.message || 'Could not prepare the document. Please try again.');
+    setBtn('btn4', false, '<span class="ds-logo">✍️</span> Sign Lease with DocuSign');
+    busy = false;
+  }
+}
+
+async function callSigningComplete() {
+  var res  = await fetch(API_BASE + '?action=signing-complete', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token }),
+  });
+  var json = await res.json();
+  if (json.error) throw new Error(json.error);
+}
+
+// ── Success screen ────────────────────────────────────────────
+
+function showSuccess(hasPayment, hasSigning) {
+  for (var i = 1; i <= 4; i++) {
+    document.getElementById('step' + i).style.display = 'none';
+  }
+  document.getElementById('step-bar').style.display = 'none';
+  updateSteps(5);
+
+  var lines = [];
+  if (hasSigning)  lines.push('Your lease has been signed and saved to your files.');
+  if (hasPayment)  lines.push('Your rent will be charged automatically on the 1st of each month.');
+  if (!hasPayment && !hasSigning) lines.push('Your information has been saved.');
+  lines.push('');
+  lines.push('Your landlord has been notified. You may close this page.');
+
+  document.getElementById('success-body').innerHTML = lines.join('<br/>');
+  document.getElementById('success-view').classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+loadInvite();
 </script>
 </body>
 </html>
