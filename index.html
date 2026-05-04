@@ -609,6 +609,7 @@ async function callConfirmPayment(setupIntentId) {
   var json = await res.json();
   if (json.error) throw new Error(json.error);
 
+  busy = false;
   if (json.hasDocuSign) {
     buildLeaseSummary();
     showStep(4);
