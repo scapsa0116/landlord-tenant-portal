@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <title>Rental Application</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#F0F2FA;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px 60px}
+    .wrap{width:100%;max-width:480px}
+
+    .hero{background:linear-gradient(135deg,#4361EE 0%,#6C63FF 100%);border-radius:24px;padding:28px 24px 24px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;width:160px;height:160px;border-radius:80px;background:rgba(255,255,255,.08);top:-40px;right:-30px;pointer-events:none}
+    .hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.2px;opacity:.7;text-transform:uppercase;margin-bottom:6px}
+    .hero-title{font-size:24px;font-weight:900;line-height:1.2;margin-bottom:4px}
+    .hero-loc{font-size:14px;opacity:.75;margin-bottom:18px}
+    .rent-chip{display:inline-flex;align-items:center;background:rgba(255,255,255,.2);border-radius:30px;padding:8px 20px;font-size:22px;font-weight:900;letter-spacing:-.5px}
+
+    .steps{display:flex;align-items:center;margin-bottom:20px;padding:0 4px}
+    .step-item{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+    .step-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:#E8EAF2;z-index:0}
+    .step-item.done::after,.step-item.active::after{background:#4361EE}
+    .step-dot{width:28px;height:28px;border-radius:14px;background:#E8EAF2;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#9CA3AF;z-index:1;position:relative}
+    .step-item.active .step-dot{background:#4361EE;color:#fff}
+    .step-item.done .step-dot{background:#2DC98E;color:#fff}
+    .step-label{font-size:10px;font-weight:700;color:#9CA3AF;margin-top:5px;text-align:center}
+    .step-item.active .step-label{color:#4361EE}
+    .step-item.done .step-label{color:#2DC98E}
+
+    .card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 2px 20px rgba(67,97,238,.08)}
+    .card-title{font-size:13px;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:20px}
+
+    .field{margin-bottom:18px}
+    .field:last-child{margin-bottom:0}
+    .field label{display:block;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .field input,.field select{display:block;width:100%;background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;outline:none;-webkit-appearance:none;transition:border-color .15s;font-family:inherit}
+    .field input:focus,.field select:focus{border-color:#4361EE;background:#fff}
+    .field input::placeholder{color:#C4C9D4}
+    .field-hint{font-size:11px;color:#9CA3AF;margin-top:6px;line-height:1.5}
+    .field-optional{font-size:10px;font-weight:600;color:#9CA3AF;margin-left:6px;text-transform:none;letter-spacing:0}
+
+    .btn{display:block;width:100%;border:none;border-radius:18px;padding:19px 24px;font-size:17px;font-weight:800;cursor:pointer;text-align:center;transition:opacity .2s;-webkit-appearance:none;margin-bottom:12px;font-family:inherit}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn-primary{background:linear-gradient(135deg,#4361EE,#6C63FF);color:#fff}
+    .btn-secondary{background:#fff;color:#4361EE;border:2.5px solid #E8EAF2}
+
+    .err-msg{color:#EF4444;font-size:13px;font-weight:600;margin-top:8px;min-height:18px;text-align:center}
+    .secure-note{font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:12px}
+
+    .spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Review summary */
+    .review-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F0F2FA;font-size:14px}
+    .review-row:last-child{border-bottom:none}
+    .review-label{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;padding-top:1px;min-width:90px}
+    .review-value{color:#1A1D2E;font-weight:600;flex:1}
+
+    /* Success */
+    .success-wrap{text-align:center;padding:32px 16px}
+    .success-icon{font-size:64px;margin-bottom:20px}
+    .success-title{font-size:22px;font-weight:900;color:#1A1D2E;margin-bottom:10px}
+    .success-sub{font-size:15px;color:#6B7280;line-height:1.7}
+
+    #loading{text-align:center;padding:60px 20px;color:#9CA3AF;font-size:15px}
+    #error-screen{display:none;text-align:center;padding:60px 20px}
+    .error-icon{font-size:48px;margin-bottom:16px}
+    .error-title{font-size:18px;font-weight:800;color:#1A1D2E;margin-bottom:8px}
+    .error-body{font-size:14px;color:#6B7280;line-height:1.6}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div id="loading"><span class="spinner" style="border-color:rgba(67,97,238,.3);border-top-color:#4361EE"></span> Loading…</div>
+
+  <div id="error-screen">
+    <div class="error-icon">⚠️</div>
+    <div class="error-title" id="error-title">Something went wrong</div>
+    <div class="error-body" id="error-body">Please contact your landlord for a new link.</div>
+  </div>
+
+  <div id="main" style="display:none">
+    <!-- Step progress -->
+    <div class="steps" id="step-bar">
+      <div class="step-item active" id="step-1-item">
+        <div class="step-dot" id="dot-1">1</div>
+        <div class="step-label">Personal</div>
+      </div>
+      <div class="step-item" id="step-2-item">
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-label">Employment</div>
+      </div>
+      <div class="step-item" id="step-3-item">
+        <div class="step-dot" id="dot-3">3</div>
+        <div class="step-label">Review</div>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow">Rental Application</div>
+      <div class="hero-title" id="hero-title">Apply Now</div>
+      <div id="hero-loc" class="hero-loc"></div>
+      <div id="rent-chip" class="rent-chip"></div>
+    </div>
+
+    <!-- ── STEP 1: Personal Info ── -->
+    <div id="step1">
+      <div class="card">
+        <div class="card-title">Personal Information</div>
+        <div class="field">
+          <label for="full_name">Full Name</label>
+          <input id="full_name" type="text" placeholder="Jane Smith" autocomplete="name"/>
+        </div>
+        <div class="field">
+          <label for="email">Email Address</label>
+          <input id="email" type="email" placeholder="jane@example.com" autocomplete="email" inputmode="email"/>
+        </div>
+        <div class="field">
+          <label for="phone">Phone Number <span class="field-optional">(optional)</span></label>
+          <input id="phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel"/>
+        </div>
+        <div class="field">
+          <label for="dob">Date of Birth <span class="field-optional">(optional)</span></label>
+          <input id="dob" type="date"/>
+        </div>
+        <div class="field">
+          <label for="address">Current Address <span class="field-optional">(optional)</span></label>
+          <input id="address" type="text" placeholder="123 Main St, Chicago, IL"/>
+        </div>
+        <div id="err1" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn1" onclick="goStep2()">Next: Employment →</button>
+      <div class="secure-note">🔒 Your information is sent securely to your landlord.</div>
+    </div>
+
+    <!-- ── STEP 2: Employment ── -->
+    <div id="step2" style="display:none">
+      <div class="card">
+        <div class="card-title">Employment & Income</div>
+        <div class="field">
+          <label for="emp_type">Employment Type</label>
+          <select id="emp_type">
+            <option value="full-time">Full-Time Employee</option>
+            <option value="part-time">Part-Time Employee</option>
+            <option value="self-employed">Self-Employed</option>
+            <option value="contractor">Independent Contractor</option>
+            <option value="retired">Retired</option>
+            <option value="student">Student</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="employer">Employer / Company <span class="field-optional">(optional)</span></label>
+          <input id="employer" type="text" placeholder="Acme Corp"/>
+        </div>
+        <div class="field">
+          <label for="job_title">Job Title <span class="field-optional">(optional)</span></label>
+          <input id="job_title" type="text" placeholder="Software Engineer"/>
+        </div>
+        <div class="field">
+          <label for="income">Monthly Income (USD)</label>
+          <input id="income" type="number" placeholder="5000" inputmode="decimal" min="0"/>
+          <div class="field-hint">Your gross monthly income before taxes.</div>
+        </div>
+        <div id="err2" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn2" onclick="goStep3()">Next: Review →</button>
+      <button class="btn btn-secondary" onclick="showStep(1)">← Back</button>
+    </div>
+
+    <!-- ── STEP 3: Review & Submit ── -->
+    <div id="step3" style="display:none">
+      <div class="card">
+        <div class="card-title">Review Your Application</div>
+        <div id="review-content"></div>
+        <div id="err3" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn3" onclick="submitApplication()">Submit Application →</button>
+      <button class="btn btn-secondary" onclick="showStep(2)">← Back</button>
+      <div class="secure-note">🔒 By submitting you confirm all information is accurate.</div>
+    </div>
+
+    <!-- ── SUCCESS ── -->
+    <div id="success" style="display:none">
+      <div class="card">
+        <div class="success-wrap">
+          <div class="success-icon">🎉</div>
+          <div class="success-title">Application Submitted!</div>
+          <div class="success-sub">Your landlord will review your application and get back to you within 1–3 business days.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var token = '';
+var appInfo = {};
+var busy = false;
+
+var API_BASE = 'https://iykkkfcwuparqtomyaow.supabase.co/functions/v1/tenant-onboarding';
+
+function setErr(id, msg) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = msg;
+}
+
+function setBtn(id, disabled, html) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.disabled = disabled;
+  el.innerHTML = html;
+}
+
+function updateSteps(active) {
+  for (var i = 1; i <= 3; i++) {
+    var item = document.getElementById('step-' + i + '-item');
+    var dot  = document.getElementById('dot-' + i);
+    if (!item) continue;
+    item.className = 'step-item' + (i < active ? ' done' : i === active ? ' active' : '');
+    dot.textContent = i < active ? '✓' : String(i);
+  }
+}
+
+function showStep(n) {
+  for (var i = 1; i <= 3; i++) {
+    var el = document.getElementById('step' + i);
+    if (el) el.style.display = (n === i) ? '' : 'none';
+  }
+  updateSteps(n);
+  window.scrollTo(0, 0);
+}
+
+function goStep2() {
+  setErr('err1', '');
+  var name  = document.getElementById('full_name').value.trim();
+  var email = document.getElementById('email').value.trim();
+  if (!name)  { setErr('err1', 'Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { setErr('err1', 'Please enter a valid email address.'); return; }
+  showStep(2);
+}
+
+function goStep3() {
+  setErr('err2', '');
+  var income = document.getElementById('income').value.trim();
+  if (!income || Number(income) <= 0) { setErr('err2', 'Please enter your monthly income.'); return; }
+  buildReview();
+  showStep(3);
+}
+
+function fmtEmpType(v) {
+  return { 'full-time':'Full-Time', 'part-time':'Part-Time', 'self-employed':'Self-Employed',
+           'contractor':'Contractor', 'retired':'Retired', 'student':'Student', 'other':'Other' }[v] || v;
+}
+
+function buildReview() {
+  var rows = [
+    ['Name',       document.getElementById('full_name').value.trim()],
+    ['Email',      document.getElementById('email').value.trim()],
+    ['Phone',      document.getElementById('phone').value.trim() || '—'],
+    ['Date of Birth', document.getElementById('dob').value || '—'],
+    ['Address',    document.getElementById('address').value.trim() || '—'],
+    ['Employment', fmtEmpType(document.getElementById('emp_type').value)],
+    ['Employer',   document.getElementById('employer').value.trim() || '—'],
+    ['Job Title',  document.getElementById('job_title').value.trim() || '—'],
+    ['Monthly Income', document.getElementById('income').value
+      ? '$' + Number(document.getElementById('income').value).toLocaleString()
+      : '—'],
+  ];
+  var html = rows.map(function(r) {
+    return '<div class="review-row"><div class="review-label">' + r[0] +
+           '</div><div class="review-value">' + r[1] + '</div></div>';
+  }).join('');
+  document.getElementById('review-content').innerHTML = html;
+}
+
+async function submitApplication() {
+  if (busy) return;
+  setErr('err3', '');
+  busy = true;
+  setBtn('btn3', true, '<span class="spinner"></span> Submitting…');
+
+  try {
+    var payload = {
+      token:           token,
+      full_name:       document.getElementById('full_name').value.trim(),
+      email:           document.getElementById('email').value.trim(),
+      phone:           document.getElementById('phone').value.trim() || null,
+      date_of_birth:   document.getElementById('dob').value || null,
+      current_address: document.getElementById('address').value.trim() || null,
+      employment_type: document.getElementById('emp_type').value,
+      employer_name:   document.getElementById('employer').value.trim() || null,
+      job_title:       document.getElementById('job_title').value.trim() || null,
+      monthly_income:  Number(document.getElementById('income').value) || null,
+    };
+
+    var res  = await fetch(API_BASE + '?action=submit-application', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+
+    // Hide step bar, show success
+    document.getElementById('step-bar').style.display = 'none';
+    for (var i = 1; i <= 3; i++) {
+      var el = document.getElementById('step' + i);
+      if (el) el.style.display = 'none';
+    }
+    document.getElementById('success').style.display = '';
+    window.scrollTo(0, 0);
+  } catch (err) {
+    setErr('err3', err.message || 'Could not submit. Please try again.');
+    setBtn('btn3', false, 'Submit Application →');
+    busy = false;
+  }
+}
+
+function showError(title, body) {
+  document.getElementById('loading').style.display  = 'none';
+  document.getElementById('main').style.display     = 'none';
+  document.getElementById('error-screen').style.display = 'block';
+  document.getElementById('error-title').textContent = title;
+  document.getElementById('error-body').textContent  = body;
+}
+
+async function loadApplication() {
+  var params = new URLSearchParams(window.location.search);
+  token = params.get('token') || '';
+
+  if (!token) {
+    showError('Invalid Link', 'No application token found. Please use the link from your email.');
+    return;
+  }
+
+  try {
+    var res  = await fetch(API_BASE + '?action=app-info&token=' + encodeURIComponent(token));
+    var json = await res.json();
+
+    if (json.error) {
+      showError('Link Unavailable', json.error);
+      return;
+    }
+
+    appInfo = json;
+    var label = json.buildingName
+      ? json.buildingName + ' · Unit ' + json.unitNumber
+      : 'Unit ' + json.unitNumber;
+
+    document.getElementById('hero-title').textContent = 'Apply for ' + json.unitNumber;
+    document.getElementById('hero-loc').textContent   = label;
+    document.getElementById('rent-chip').textContent  = '$' + Number(json.rent).toLocaleString() + '/mo';
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').style.display    = 'block';
+  } catch (e) {
+    showError('Connection Error', 'Could not load your application. Please try again.');
+  }
+}
+
+loadApplication();
+</script>
+</body>
+</html>
