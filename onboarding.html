@@ -48,6 +48,23 @@
     .field-hint{font-size:11px;color:#9CA3AF;margin-top:6px;line-height:1.5}
     .field-optional{font-size:10px;font-weight:600;color:#9CA3AF;margin-left:6px;text-transform:none;letter-spacing:0}
 
+    /* Application form extras */
+    .section-hdr{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:2px solid #EEF1FD}
+    .field-row{display:flex;gap:10px}
+    .field-row .field{flex:1;min-width:0}
+    .dob-row{display:flex;gap:8px}
+    .dob-row select{flex:1;min-width:0}
+    .check-group{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
+    .check-row{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:#1A1D2E;cursor:pointer;line-height:1.4}
+    .check-row input[type="checkbox"]{width:20px;height:20px;min-width:20px;accent-color:#4361EE;cursor:pointer;margin-top:2px}
+    .occupant-block{background:#F8F9FF;border-radius:14px;padding:16px;margin-top:12px;border:1.5px solid #E8EAF2}
+    .occupant-label{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+    .pet-block{background:#F8F9FF;border-radius:14px;padding:16px;margin-top:12px;border:1.5px solid #E8EAF2}
+    .pet-label{font-size:11px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+    .disclosure-box{background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;color:#1A1D2E;line-height:1.75}
+    .disclosure-strong{background:#FEF2F2;border:1.5px solid #FECACA;border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;color:#374151;line-height:1.75}
+    .sig-box{background:#F0F2FA;border:2px dashed #4361EE;border-radius:14px;padding:16px;margin-top:12px;font-size:22px;font-weight:800;color:#4361EE;text-align:center;min-height:56px;letter-spacing:1px}
+
     /* Identity verification card */
     .verify-info{text-align:center;padding:4px 0 16px}
     .verify-icon-wrap{font-size:52px;margin-bottom:14px}
@@ -172,11 +189,10 @@
       <div id="rent-chip" class="rent-chip"></div>
     </div>
 
-    <!-- ── STEP 1: Your Information ── -->
-    <div id="step1">
+    <!-- ── STEP 1a: Personal Info ── -->
+    <div id="step1a">
       <div class="card">
         <div class="card-title">Your Information</div>
-
         <div class="field">
           <label for="name">Full Name</label>
           <input id="name" type="text" placeholder="Jane Smith" autocomplete="name" inputmode="text"/>
@@ -188,14 +204,157 @@
         <div class="field">
           <label for="phone">Phone Number</label>
           <input id="phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel"/>
-          <div class="field-hint">Used for payment reminders and maintenance notifications.</div>
+        </div>
+        <div class="field">
+          <label>Date of Birth</label>
+          <div class="dob-row">
+            <select id="dob-month"><option value="">Month</option><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+            <select id="dob-day"><option value="">Day</option></select>
+            <select id="dob-year"><option value="">Year</option></select>
+          </div>
         </div>
 
-        <div id="err1" class="err-msg"></div>
+        <div class="section-hdr">Current Address</div>
+        <div class="field">
+          <label for="addr-street">Street</label>
+          <input id="addr-street" type="text" placeholder="123 Main St" autocomplete="street-address"/>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="addr-city">City</label>
+            <input id="addr-city" type="text" placeholder="Chicago" autocomplete="address-level2"/>
+          </div>
+          <div class="field" style="max-width:80px">
+            <label for="addr-state">State</label>
+            <select id="addr-state"><option value="">ST</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="addr-zip">ZIP Code</label>
+          <input id="addr-zip" type="text" placeholder="60601" inputmode="numeric" maxlength="10" autocomplete="postal-code"/>
+        </div>
+        <div id="err1a" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn1a" onclick="goStep1b()">Next: Employment →</button>
+      <div class="secure-note">🔒 Your information is sent securely to your landlord.</div>
+    </div>
+
+    <!-- ── STEP 1b: Employment & Housing ── -->
+    <div id="step1b" style="display:none">
+      <div class="card">
+        <div class="card-title">Employment & Income</div>
+        <div class="field">
+          <label for="employer">Employer</label>
+          <input id="employer" type="text" placeholder="Acme Corp"/>
+        </div>
+        <div class="field">
+          <label for="position">Position / Job Title</label>
+          <input id="position" type="text" placeholder="Software Engineer"/>
+        </div>
+        <div class="field">
+          <label for="monthly-income">Monthly Income (USD)</label>
+          <input id="monthly-income" type="number" placeholder="5000" inputmode="decimal" min="0"/>
+          <div class="field-hint">Gross income before taxes.</div>
+        </div>
+
+        <div class="section-hdr">Previous Landlord</div>
+        <div class="field">
+          <label for="prev-ll-name">Name <span class="field-optional">(optional)</span></label>
+          <input id="prev-ll-name" type="text" placeholder="John Smith"/>
+        </div>
+        <div class="field">
+          <label for="prev-ll-phone">Phone <span class="field-optional">(optional)</span></label>
+          <input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
+        </div>
+        <div id="err1b" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn1b" onclick="goStep1c()">Next: Occupants →</button>
+      <button class="btn btn-secondary" onclick="showAppStep('1a')">← Back</button>
+    </div>
+
+    <!-- ── STEP 1c: Occupants & Pets ── -->
+    <div id="step1c" style="display:none">
+      <div class="card">
+        <div class="card-title">Additional Occupants</div>
+        <div class="field">
+          <label for="num-occupants">Number of additional occupants</label>
+          <select id="num-occupants" onchange="updateOccupants()">
+            <option value="0">None — just me</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+        <div id="occupants-container"></div>
       </div>
 
-      <button class="btn btn-primary" id="btn1" onclick="goVerify()">Next: Verify Identity →</button>
-      <div class="secure-note">🔒 Your information is sent securely to your landlord.</div>
+      <div class="card">
+        <div class="card-title">Pets</div>
+        <div class="check-group">
+          <label class="check-row">
+            <input type="checkbox" id="q-pets" onchange="togglePets()"/>
+            I have pets
+          </label>
+        </div>
+        <div id="pet-fields" style="display:none">
+          <div id="pets-container">
+            <div class="pet-block" id="pet-0">
+              <div class="pet-label">Pet 1</div>
+              <div class="field"><label>Type</label><input type="text" id="pet0-type" placeholder="Dog, Cat, Bird…"/></div>
+              <div class="field-row">
+                <div class="field"><label>Breed</label><input type="text" id="pet0-breed" placeholder="Labrador"/></div>
+                <div class="field"><label>Weight</label><input type="text" id="pet0-weight" placeholder="45 lbs"/></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary" style="margin-top:4px" onclick="addPet()" type="button">+ Add Another Pet</button>
+        </div>
+        <div id="err1c" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn1c" onclick="goStep1d()">Next: Disclosures →</button>
+      <button class="btn btn-secondary" onclick="showAppStep('1b')">← Back</button>
+    </div>
+
+    <!-- ── STEP 1d: Background & Disclosure ── -->
+    <div id="step1d" style="display:none">
+      <div class="card">
+        <div class="card-title">Background Questions</div>
+        <div class="check-group">
+          <label class="check-row"><input type="checkbox" id="q-evicted"/> Have you ever been evicted?</label>
+          <label class="check-row"><input type="checkbox" id="q-bankruptcy"/> Have you filed for bankruptcy?</label>
+          <label class="check-row"><input type="checkbox" id="q-owes"/> Do you owe money to a previous landlord?</label>
+        </div>
+        <div id="err1d" class="err-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Authorization & Disclosure</div>
+        <div class="disclosure-box">
+          <strong>Screening Authorization</strong><br/>
+          I authorize credit, background, eviction, identity, employment, and rental history verification. I understand that a consumer report may be obtained and used in connection with my application for tenancy.
+        </div>
+        <div class="disclosure-strong">
+          <strong>Collection & Legal Disclosure</strong><br/>
+          In the event of unpaid rent, property damage, lease violations, judgments, or other amounts lawfully owed under the lease, I understand that identifying information — including information provided during this application process — may be used and disclosed to attorneys, courts, collection agencies, credit reporting agencies, or other authorized parties as permitted by law for the purpose of recovering amounts owed.
+        </div>
+        <div class="check-group" style="margin-bottom:20px">
+          <label class="check-row">
+            <input type="checkbox" id="disclosure-agree"/>
+            I have read and agree to both disclosures above.
+          </label>
+        </div>
+        <div class="field">
+          <label for="e-sig">Electronic Signature — Type your full legal name</label>
+          <input id="e-sig" type="text" placeholder="Jane Smith" oninput="updateSigPreview()"/>
+          <div class="sig-box" id="sig-preview"></div>
+        </div>
+        <div id="err1d2" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn1d" onclick="saveAppData()">Save & Continue →</button>
+      <button class="btn btn-secondary" onclick="showAppStep('1c')">← Back</button>
+      <div class="secure-note">🔒 Your application is encrypted and stored securely.</div>
     </div>
 
     <!-- ── STEP 2: Identity Verification ── -->
@@ -218,7 +377,7 @@
       </div>
 
       <button class="btn btn-primary" id="btn2" onclick="startVerification()">Verify My Identity →</button>
-      <button class="btn btn-secondary" onclick="goBack(1)">← Back</button>
+      <button class="btn btn-secondary" onclick="goBack('1d')">← Back</button>
       <div class="secure-note">🔒 Powered by Stripe Identity — your documents are never stored by your landlord.</div>
     </div>
 
@@ -386,25 +545,216 @@ function updateSteps(active) {
   }
 }
 
+// Application sub-steps map to main progress step 1
+var APP_SUB_STEPS = ['1a','1b','1c','1d'];
+
 function showStep(n) {
-  for (var i = 1; i <= 5; i++) {
-    document.getElementById('step' + i).style.display = (n === i) ? '' : 'none';
+  // Hide all sub-steps and main steps
+  APP_SUB_STEPS.forEach(function(s) {
+    var el = document.getElementById('step' + s);
+    if (el) el.style.display = 'none';
+  });
+  for (var i = 2; i <= 5; i++) {
+    var el = document.getElementById('step' + i);
+    if (el) el.style.display = 'none';
   }
-  updateSteps(n);
+  // Show target
+  var target = document.getElementById('step' + n);
+  if (target) target.style.display = '';
+  // Progress bar: sub-steps = bar step 1; others = their number
+  var barStep = (APP_SUB_STEPS.indexOf(String(n)) >= 0) ? 1 : Number(n);
+  updateSteps(barStep);
   window.scrollTo(0, 0);
 }
 
+function showAppStep(sub) { showStep(sub); }
 function goBack(n) { showStep(n); }
 
-function goVerify() {
-  setErr('err1', '');
+// ── DOB selects population ────────────────────────────────────
+(function() {
+  var dayEl = document.getElementById('dob-day');
+  var yrEl  = document.getElementById('dob-year');
+  if (!dayEl || !yrEl) return;
+  for (var d = 1; d <= 31; d++) {
+    var o = document.createElement('option');
+    o.value = o.textContent = String(d).padStart(2,'0');
+    dayEl.appendChild(o);
+  }
+  var yr = new Date().getFullYear();
+  for (var y = yr - 18; y >= yr - 90; y--) {
+    var o2 = document.createElement('option');
+    o2.value = o2.textContent = String(y);
+    yrEl.appendChild(o2);
+  }
+})();
+
+// ── Application sub-step navigation ──────────────────────────
+function goStep1b() {
+  setErr('err1a', '');
   var name  = document.getElementById('name').value.trim();
   var email = document.getElementById('email').value.trim();
-  if (!name)  { setErr('err1', 'Please enter your full name.'); document.getElementById('name').focus(); return; }
-  if (!email || !email.includes('@')) { setErr('err1', 'Please enter a valid email address.'); document.getElementById('email').focus(); return; }
-  // Skip verification step if Stripe is not configured
-  if (!inviteInfo.hasVerification) { showStep(3); return; }
-  showStep(2);
+  if (!name)  { setErr('err1a', 'Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { setErr('err1a', 'Please enter a valid email address.'); return; }
+  showAppStep('1b');
+}
+
+function goStep1c() {
+  setErr('err1b', '');
+  var income = document.getElementById('monthly-income').value.trim();
+  var emp    = document.getElementById('employer').value.trim();
+  if (!emp)    { setErr('err1b', 'Please enter your employer name.'); return; }
+  if (!income || Number(income) <= 0) { setErr('err1b', 'Please enter your monthly income.'); return; }
+  showAppStep('1c');
+}
+
+function goStep1d() {
+  setErr('err1c', '');
+  showAppStep('1d');
+}
+
+// ── Occupants ─────────────────────────────────────────────────
+var petCount = 1;
+
+function updateOccupants() {
+  var n   = parseInt(document.getElementById('num-occupants').value) || 0;
+  var box = document.getElementById('occupants-container');
+  box.innerHTML = '';
+  for (var i = 1; i <= n; i++) {
+    var idx = i;
+    box.innerHTML +=
+      '<div class="occupant-block">' +
+        '<div class="occupant-label">Occupant ' + idx + '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>First Name</label><input type="text" id="occ' + idx + '-first" placeholder="First"/></div>' +
+          '<div class="field"><label>Last Name</label><input type="text" id="occ' + idx + '-last" placeholder="Last"/></div>' +
+        '</div>' +
+        '<div class="field"><label>Date of Birth</label><input type="date" id="occ' + idx + '-dob"/></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Email</label><input type="email" id="occ' + idx + '-email" placeholder="email@example.com"/></div>' +
+          '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
+        '</div>' +
+        '<div class="field"><label>Employer</label><input type="text" id="occ' + idx + '-employer" placeholder="Employer or school"/></div>' +
+      '</div>';
+  }
+}
+
+// ── Pets ──────────────────────────────────────────────────────
+function togglePets() {
+  document.getElementById('pet-fields').style.display =
+    document.getElementById('q-pets').checked ? '' : 'none';
+}
+
+function addPet() {
+  var c   = document.getElementById('pets-container');
+  var idx = petCount;
+  var div = document.createElement('div');
+  div.className = 'pet-block';
+  div.id = 'pet-' + idx;
+  div.innerHTML =
+    '<div class="pet-label">Pet ' + (idx + 1) + '</div>' +
+    '<div class="field"><label>Type</label><input type="text" id="pet' + idx + '-type" placeholder="Dog, Cat…"/></div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Breed</label><input type="text" id="pet' + idx + '-breed" placeholder="Labrador"/></div>' +
+      '<div class="field"><label>Weight</label><input type="text" id="pet' + idx + '-weight" placeholder="45 lbs"/></div>' +
+    '</div>';
+  c.appendChild(div);
+  petCount++;
+}
+
+// ── Signature preview ─────────────────────────────────────────
+function updateSigPreview() {
+  var sig = document.getElementById('e-sig').value;
+  var el  = document.getElementById('sig-preview');
+  if (el) el.textContent = sig || '';
+}
+
+// ── Save application data then go to verify / lease ──────────
+async function saveAppData() {
+  setErr('err1d',  '');
+  setErr('err1d2', '');
+  var agree = document.getElementById('disclosure-agree').checked;
+  var sig   = document.getElementById('e-sig').value.trim();
+  if (!agree) { setErr('err1d2', 'You must agree to the disclosure to continue.'); return; }
+  if (!sig)   { setErr('err1d2', 'Please type your full legal name as your electronic signature.'); return; }
+
+  // Collect occupants
+  var numOcc   = parseInt(document.getElementById('num-occupants').value) || 0;
+  var occupants = [];
+  for (var i = 1; i <= numOcc; i++) {
+    occupants.push({
+      first_name: (document.getElementById('occ' + i + '-first')?.value || '').trim(),
+      last_name:  (document.getElementById('occ' + i + '-last')?.value  || '').trim(),
+      dob:        (document.getElementById('occ' + i + '-dob')?.value   || ''),
+      email:      (document.getElementById('occ' + i + '-email')?.value || '').trim(),
+      phone:      (document.getElementById('occ' + i + '-phone')?.value || '').trim(),
+      employer:   (document.getElementById('occ' + i + '-employer')?.value || '').trim(),
+    });
+  }
+
+  // Collect pets
+  var hasPets = document.getElementById('q-pets').checked;
+  var pets = [];
+  if (hasPets) {
+    for (var j = 0; j < petCount; j++) {
+      var t = document.getElementById('pet' + j + '-type')?.value?.trim();
+      if (t) {
+        pets.push({
+          type:   t,
+          breed:  (document.getElementById('pet' + j + '-breed')?.value  || '').trim(),
+          weight: (document.getElementById('pet' + j + '-weight')?.value || '').trim(),
+        });
+      }
+    }
+  }
+
+  // DOB
+  var dobM = document.getElementById('dob-month').value;
+  var dobD = document.getElementById('dob-day').value;
+  var dobY = document.getElementById('dob-year').value;
+  var dob  = (dobY && dobM && dobD) ? dobY + '-' + dobM + '-' + dobD : null;
+
+  setBtn('btn1d', true, '<span class="spinner"></span> Saving…');
+  busy = true;
+
+  try {
+    var res  = await fetch(API_BASE + '?action=save-app-data', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token:               token,
+        date_of_birth:       dob,
+        address_street:      document.getElementById('addr-street').value.trim(),
+        address_city:        document.getElementById('addr-city').value.trim(),
+        address_state:       document.getElementById('addr-state').value,
+        address_zip:         document.getElementById('addr-zip').value.trim(),
+        employer:            document.getElementById('employer').value.trim(),
+        position:            document.getElementById('position').value.trim(),
+        monthly_income:      Number(document.getElementById('monthly-income').value) || null,
+        prev_landlord_name:  document.getElementById('prev-ll-name').value.trim(),
+        prev_landlord_phone: document.getElementById('prev-ll-phone').value.trim(),
+        num_occupants:       numOcc,
+        occupants,
+        evicted:             document.getElementById('q-evicted').checked,
+        bankruptcy:          document.getElementById('q-bankruptcy').checked,
+        owes_landlord:       document.getElementById('q-owes').checked,
+        has_pets:            hasPets,
+        pets,
+        disclosure_agreed:   true,
+        electronic_signature: sig,
+      }),
+    });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+
+    setBtn('btn1d', false, 'Save & Continue →');
+    busy = false;
+
+    if (!inviteInfo.hasVerification) { showStep(3); return; }
+    showStep(2);
+  } catch (err) {
+    setErr('err1d2', err.message || 'Could not save. Please try again.');
+    setBtn('btn1d', false, 'Save & Continue →');
+    busy = false;
+  }
 }
 
 function goStep4() {
@@ -532,7 +882,7 @@ async function loadInvite() {
   try {
     var json = await loadFormData();
     showFormUI(json);
-    showStep(1);
+    showStep('1a');
   } catch (e) {
     showError('Unable to load this invite. Please check your connection and try again.');
   }
