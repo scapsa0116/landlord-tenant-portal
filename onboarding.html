@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Tenant Onboarding</title>
+  <title>Tenant Application</title>
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -42,30 +42,80 @@
     .field{margin-bottom:18px}
     .field:last-child{margin-bottom:0}
     .field label{display:block;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-    .field input,.field select{display:block;width:100%;background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;outline:none;-webkit-appearance:none;transition:border-color .15s;font-family:inherit}
-    .field input:focus,.field select:focus{border-color:#4361EE;background:#fff}
-    .field input::placeholder{color:#C4C9D4}
+    .field input,.field select,.field textarea{display:block;width:100%;background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;outline:none;-webkit-appearance:none;transition:border-color .15s;font-family:inherit}
+    .field textarea{min-height:90px;resize:vertical;line-height:1.5}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:#4361EE;background:#fff}
+    .field input::placeholder,.field textarea::placeholder{color:#C4C9D4}
     .field-hint{font-size:11px;color:#9CA3AF;margin-top:6px;line-height:1.5}
     .field-optional{font-size:10px;font-weight:600;color:#9CA3AF;margin-left:6px;text-transform:none;letter-spacing:0}
-
-    /* Application form extras */
-    .section-hdr{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:2px solid #EEF1FD}
     .field-row{display:flex;gap:10px}
     .field-row .field{flex:1;min-width:0}
+
+    /* Section headers */
+    .section-hdr{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:2px solid #EEF1FD}
+
+    /* DOB */
     .dob-row{display:flex;gap:8px}
     .dob-row select{flex:1;min-width:0}
+
+    /* Checkboxes */
     .check-group{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
     .check-row{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:#1A1D2E;cursor:pointer;line-height:1.4}
     .check-row input[type="checkbox"]{width:20px;height:20px;min-width:20px;accent-color:#4361EE;cursor:pointer;margin-top:2px}
+
+    /* Occupant/Pet blocks */
     .occupant-block{background:#F8F9FF;border-radius:14px;padding:16px;margin-top:12px;border:1.5px solid #E8EAF2}
     .occupant-label{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
     .pet-block{background:#F8F9FF;border-radius:14px;padding:16px;margin-top:12px;border:1.5px solid #E8EAF2}
     .pet-label{font-size:11px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+    /* Disclosures */
     .disclosure-box{background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;color:#1A1D2E;line-height:1.75}
     .disclosure-strong{background:#FEF2F2;border:1.5px solid #FECACA;border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;color:#374151;line-height:1.75}
     .sig-box{background:#F0F2FA;border:2px dashed #4361EE;border-radius:14px;padding:16px;margin-top:12px;font-size:22px;font-weight:800;color:#4361EE;text-align:center;min-height:56px;letter-spacing:1px}
 
-    /* Identity verification card */
+    /* Screening cards */
+    .screening-provider{background:#F0F2FA;border-radius:16px;padding:18px;margin-bottom:14px;border:2px solid #E8EAF2}
+    .screening-provider.active{border-color:#4361EE;background:#EEF1FD}
+    .sp-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .sp-icon{font-size:28px}
+    .sp-name{font-size:15px;font-weight:800;color:#1A1D2E}
+    .sp-tag{font-size:10px;font-weight:700;background:#4361EE;color:#fff;border-radius:6px;padding:2px 8px;margin-left:6px}
+    .sp-desc{font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:10px}
+    .sp-items{display:flex;flex-direction:column;gap:6px}
+    .sp-item{font-size:12px;color:#374151;display:flex;gap:6px;align-items:flex-start}
+    .sp-price{font-size:13px;font-weight:700;color:#4361EE;margin-top:10px}
+    .screening-verified{background:#E8FAF3;border:2px solid #2DC98E;border-radius:14px;padding:14px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .sv-icon{font-size:22px}
+    .sv-text{font-size:14px;font-weight:700;color:#059669}
+
+    /* Insurance option cards */
+    .insurance-card{border:2px solid #E8EAF2;border-radius:16px;padding:16px;margin-bottom:12px}
+    .insurance-card.required{border-color:#EF4444;background:#FEF2F2}
+    .insurance-card.optional{border-color:#FCD34D;background:#FFFBEB}
+    .insurance-card.waived{border-color:#2DC98E;background:#E8FAF3}
+    .insurance-card.not-offered{border-color:#E8EAF2;background:#F9FAFB}
+    .ic-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .ic-icon{font-size:22px}
+    .ic-title{font-size:14px;font-weight:800;color:#1A1D2E}
+    .ic-badge{font-size:10px;font-weight:800;border-radius:8px;padding:3px 10px}
+    .badge-required{background:#FEE2E2;color:#DC2626}
+    .badge-optional{background:#FEF3C7;color:#D97706}
+    .badge-waived{background:#D1FAE5;color:#059669}
+    .badge-na{background:#F3F4F6;color:#9CA3AF}
+    .ic-desc{font-size:13px;color:#6B7280;line-height:1.5}
+    .ic-examples{font-size:12px;color:#9CA3AF;margin-top:6px;line-height:1.6}
+    .ic-confirm{margin-top:12px}
+
+    /* Doc upload */
+    .doc-upload-row{display:flex;align-items:center;gap:10px;background:#F0F2FA;border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
+    .doc-upload-icon{font-size:20px}
+    .doc-upload-label{font-size:13px;font-weight:600;color:#1A1D2E;flex:1}
+    .doc-upload-status{font-size:11px;color:#9CA3AF}
+    .doc-upload-input{display:none}
+    .doc-attached{color:#059669;font-weight:700}
+
+    /* Identity verification */
     .verify-info{text-align:center;padding:4px 0 16px}
     .verify-icon-wrap{font-size:52px;margin-bottom:14px}
     .verify-heading{font-size:17px;font-weight:800;color:#1A1D2E;margin-bottom:8px}
@@ -73,7 +123,7 @@
     .verify-items{text-align:left;background:#F0F2FA;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
     .verify-item{font-size:14px;color:#374151;line-height:1.5}
 
-    /* Payment method cards */
+    /* Payment */
     .pay-methods{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
     .pay-method{border:2px solid #E8EAF2;border-radius:14px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:12px}
     .pay-method.selected{border-color:#4361EE;background:#EEF1FD}
@@ -85,35 +135,21 @@
     .badge-free{background:#E8FAF3;color:#059669}
     .badge-instant{background:#EEF1FD;color:#4361EE}
     .badge-fee{background:#FEF3C7;color:#B45309}
-
-    /* Auto-pay info box */
     .autopay-box{background:#EEF1FD;border-radius:14px;padding:16px;margin-bottom:18px}
     .autopay-box-title{font-size:13px;font-weight:800;color:#4361EE;margin-bottom:8px}
     .autopay-row{font-size:13px;color:#1A1D2E;line-height:20px;margin-bottom:4px;display:flex;gap:8px}
     .autopay-row span:first-child{flex-shrink:0}
-
-    /* Date picker inputs */
-    .field input[type="date"]{background:#F0F2FA;border:2px solid transparent;border-radius:14px;padding:15px 18px;font-size:16px;color:#1A1D2E;width:100%;display:block;outline:none;-webkit-appearance:none;font-family:inherit;min-height:54px}
-    .field input[type="date"]:focus{border-color:#4361EE;background:#fff}
-    .date-wrap{position:relative}
-    .date-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:20px;pointer-events:none}
-    .date-placeholder{font-size:14px;color:#9CA3AF;margin-top:6px}
-
-    /* Stripe element */
     #payment-element-wrap{background:#F0F2FA;border-radius:14px;padding:16px;margin-bottom:18px;min-height:60px}
     #payment-element-wrap.loading{display:flex;align-items:center;justify-content:center;color:#9CA3AF;font-size:14px;gap:8px}
 
-    /* Lease summary table */
+    /* Lease */
     .lease-summary{width:100%;border-collapse:collapse;margin-bottom:20px}
     .lease-summary td{padding:10px 0;border-bottom:1px solid #F0F2FA;font-size:14px;vertical-align:top}
     .lease-summary td:first-child{font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;padding-right:12px;white-space:nowrap}
     .lease-summary td:last-child{color:#1A1D2E;font-weight:600;text-align:right}
-
-    /* DocuSign button */
     .btn-docusign{background:#1A1D2E;color:#fff;border-radius:18px;padding:19px 24px;font-size:17px;font-weight:800;width:100%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;transition:opacity .2s;font-family:inherit}
     .btn-docusign:disabled{opacity:.55;cursor:not-allowed}
     .btn-docusign:active:not(:disabled){opacity:.85}
-    .ds-logo{font-size:20px}
 
     /* Buttons */
     .btn{display:block;width:100%;border:none;border-radius:18px;padding:19px 24px;font-size:17px;font-weight:800;cursor:pointer;text-align:center;transition:opacity .2s,transform .1s;-webkit-appearance:none;margin-bottom:12px;font-family:inherit}
@@ -121,6 +157,7 @@
     .btn:active:not(:disabled){transform:scale(.98)}
     .btn-primary{background:#4361EE;color:#fff}
     .btn-secondary{background:#fff;color:#4361EE;border:2px solid #4361EE}
+    .btn-success{background:#2DC98E;color:#fff}
 
     /* Error */
     .err-msg{display:none;color:#EF4444;font-size:13px;font-weight:600;margin-top:10px;margin-bottom:4px;padding:10px 14px;background:#FEE2E2;border-radius:10px}
@@ -129,25 +166,29 @@
     /* Secure note */
     .secure-note{text-align:center;color:#9CA3AF;font-size:12px;line-height:1.5;margin-top:4px}
 
-    /* Success / Error / Loading views */
-    .success{display:none;text-align:center;padding:60px 20px}
-    .success.on{display:block}
+    /* Success / Error / Loading */
+    .success-view{display:none;text-align:center;padding:60px 20px}
+    .success-view.on{display:block}
     .success-icon{font-size:80px;margin-bottom:20px}
     .success-title{font-size:28px;font-weight:900;color:#1A1D2E;margin-bottom:10px}
-    .success-body{color:#6B7280;font-size:16px;line-height:1.6}
+    .success-body{color:#6B7280;font-size:16px;line-height:1.6;margin-bottom:24px}
+    .success-detail{background:#F0F2FA;border-radius:16px;padding:18px;text-align:left;margin-bottom:20px}
+    .success-detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #E8EAF2;font-size:13px}
+    .success-detail-row:last-child{border-bottom:none}
+    .success-detail-row span:first-child{color:#9CA3AF;font-weight:600}
+    .success-detail-row span:last-child{color:#1A1D2E;font-weight:700}
     .error-page{text-align:center;padding:60px 20px}
     .error-icon{font-size:64px;margin-bottom:18px}
     .error-title{font-size:22px;font-weight:900;color:#1A1D2E;margin-bottom:10px}
     .error-body{color:#6B7280;font-size:15px;line-height:1.6}
-    .loading{text-align:center;padding:60px 20px;color:#6B7280;font-size:16px}
-
+    .loading-wrap{text-align:center;padding:60px 20px;color:#6B7280;font-size:16px}
     @keyframes spin{to{transform:rotate(360deg)}}
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <div id="loading" class="loading">Loading your invite…</div>
+  <div id="loading" class="loading-wrap">Loading your application…</div>
 
   <div id="error-view" class="error-page" style="display:none">
     <div class="error-icon">🔗</div>
@@ -157,45 +198,55 @@
 
   <div id="main" style="display:none">
 
-    <!-- Step progress: 5 steps -->
+    <!-- 3-step progress bar -->
     <div class="steps" id="step-bar">
-      <div class="step-item active" id="step-1-item">
-        <div class="step-dot" id="dot-1">1</div>
-        <div class="step-label">Info</div>
+      <div class="step-item active" id="pb-item-1">
+        <div class="step-dot" id="pb-dot-1">1</div>
+        <div class="step-label" id="pb-lbl-1">Personal</div>
       </div>
-      <div class="step-item" id="step-2-item">
-        <div class="step-dot" id="dot-2">2</div>
-        <div class="step-label">Verify</div>
+      <div class="step-item" id="pb-item-2">
+        <div class="step-dot" id="pb-dot-2">2</div>
+        <div class="step-label" id="pb-lbl-2">Employment</div>
       </div>
-      <div class="step-item" id="step-3-item">
-        <div class="step-dot" id="dot-3">3</div>
-        <div class="step-label">Lease</div>
-      </div>
-      <div class="step-item" id="step-4-item">
-        <div class="step-dot" id="dot-4">4</div>
-        <div class="step-label">Payment</div>
-      </div>
-      <div class="step-item" id="step-5-item">
-        <div class="step-dot" id="dot-5">5</div>
-        <div class="step-label">Sign</div>
+      <div class="step-item" id="pb-item-3">
+        <div class="step-dot" id="pb-dot-3">3</div>
+        <div class="step-label" id="pb-lbl-3">Screening</div>
       </div>
     </div>
 
-    <!-- Hero (always visible once loaded) -->
+    <!-- Hero -->
     <div class="hero">
-      <div class="hero-eyebrow" id="hero-eyebrow">Tenant Onboarding</div>
+      <div class="hero-eyebrow" id="hero-eyebrow">Rental Application</div>
       <div class="hero-title" id="hero-title">Welcome!</div>
       <div id="hero-loc" class="hero-loc"></div>
       <div id="rent-chip" class="rent-chip"></div>
     </div>
 
-    <!-- ── STEP 1a: Personal Info ── -->
+    <!-- ════════════════════════════════════════════════════════════
+         PHASE 1 — APPLICATION
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- STEP 1a — Basic Personal Info -->
     <div id="step1a">
       <div class="card">
-        <div class="card-title">Your Information</div>
+        <div class="card-title">Personal Information</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="first-name">First Name</label>
+            <input id="first-name" type="text" placeholder="Jane" autocomplete="given-name"/>
+          </div>
+          <div class="field">
+            <label for="last-name">Last Name</label>
+            <input id="last-name" type="text" placeholder="Smith" autocomplete="family-name"/>
+          </div>
+        </div>
         <div class="field">
-          <label for="name">Full Name</label>
-          <input id="name" type="text" placeholder="Jane Smith" autocomplete="name" inputmode="text"/>
+          <label>Date of Birth</label>
+          <div class="dob-row">
+            <select id="dob-month"><option value="">Month</option><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+            <select id="dob-day"><option value="">Day</option></select>
+            <select id="dob-year"><option value="">Year</option></select>
+          </div>
         </div>
         <div class="field">
           <label for="email">Email Address</label>
@@ -206,15 +257,20 @@
           <input id="phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel"/>
         </div>
         <div class="field">
-          <label>Date of Birth</label>
-          <div class="dob-row">
-            <select id="dob-month"><option value="">Month</option><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
-            <select id="dob-day"><option value="">Day</option></select>
-            <select id="dob-year"><option value="">Year</option></select>
-          </div>
+          <label for="drivers-license">Driver's License Number <span class="field-optional">(optional)</span></label>
+          <input id="drivers-license" type="text" placeholder="D1234567"/>
+          <div class="field-hint">Used only for identity verification purposes.</div>
         </div>
+        <div id="err1a" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn1a" onclick="goStep1b()">Next: Address →</button>
+      <div class="secure-note">🔒 Your information is encrypted and stored securely.</div>
+    </div>
 
-        <div class="section-hdr">Current Address</div>
+    <!-- STEP 1b — Addresses + Emergency Contact -->
+    <div id="step1b" style="display:none">
+      <div class="card">
+        <div class="card-title">Current Address</div>
         <div class="field">
           <label for="addr-street">Street</label>
           <input id="addr-street" type="text" placeholder="123 Main St" autocomplete="street-address"/>
@@ -233,46 +289,57 @@
           <label for="addr-zip">ZIP Code</label>
           <input id="addr-zip" type="text" placeholder="60601" inputmode="numeric" maxlength="10" autocomplete="postal-code"/>
         </div>
-        <div id="err1a" class="err-msg"></div>
       </div>
-      <button class="btn btn-primary" id="btn1a" onclick="goStep1b()">Next: Employment →</button>
-      <div class="secure-note">🔒 Your information is sent securely to your landlord.</div>
-    </div>
 
-    <!-- ── STEP 1b: Employment & Housing ── -->
-    <div id="step1b" style="display:none">
       <div class="card">
-        <div class="card-title">Employment & Income</div>
+        <div class="card-title">Previous Address <span class="field-optional" style="font-size:11px">optional</span></div>
         <div class="field">
-          <label for="employer">Employer</label>
-          <input id="employer" type="text" placeholder="Acme Corp"/>
+          <label for="prev-addr-street">Street</label>
+          <input id="prev-addr-street" type="text" placeholder="456 Oak Ave"/>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="prev-addr-city">City</label>
+            <input id="prev-addr-city" type="text" placeholder="Springfield"/>
+          </div>
+          <div class="field" style="max-width:80px">
+            <label for="prev-addr-state">State</label>
+            <select id="prev-addr-state"><option value="">ST</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
+          </div>
         </div>
         <div class="field">
-          <label for="position">Position / Job Title</label>
-          <input id="position" type="text" placeholder="Software Engineer"/>
+          <label for="prev-addr-zip">ZIP</label>
+          <input id="prev-addr-zip" type="text" placeholder="62701" inputmode="numeric" maxlength="10"/>
         </div>
         <div class="field">
-          <label for="monthly-income">Monthly Income (USD)</label>
-          <input id="monthly-income" type="number" placeholder="5000" inputmode="decimal" min="0"/>
-          <div class="field-hint">Gross income before taxes.</div>
+          <label for="prev-addr-duration">How long did you live there?</label>
+          <input id="prev-addr-duration" type="text" placeholder="2 years"/>
         </div>
+      </div>
 
-        <div class="section-hdr">Previous Landlord</div>
+      <div class="card">
+        <div class="card-title">Emergency Contact</div>
         <div class="field">
-          <label for="prev-ll-name">Name <span class="field-optional">(optional)</span></label>
-          <input id="prev-ll-name" type="text" placeholder="John Smith"/>
+          <label for="ec-name">Full Name</label>
+          <input id="ec-name" type="text" placeholder="John Smith"/>
         </div>
-        <div class="field">
-          <label for="prev-ll-phone">Phone <span class="field-optional">(optional)</span></label>
-          <input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
+        <div class="field-row">
+          <div class="field">
+            <label for="ec-phone">Phone</label>
+            <input id="ec-phone" type="tel" placeholder="(555) 987-6543" inputmode="tel"/>
+          </div>
+          <div class="field">
+            <label for="ec-relation">Relationship</label>
+            <input id="ec-relation" type="text" placeholder="Parent, Spouse…"/>
+          </div>
         </div>
         <div id="err1b" class="err-msg"></div>
       </div>
       <button class="btn btn-primary" id="btn1b" onclick="goStep1c()">Next: Occupants →</button>
-      <button class="btn btn-secondary" onclick="showAppStep('1a')">← Back</button>
+      <button class="btn btn-secondary" onclick="showStep('1a')">← Back</button>
     </div>
 
-    <!-- ── STEP 1c: Occupants & Pets ── -->
+    <!-- STEP 1c — Occupants + Pets -->
     <div id="step1c" style="display:none">
       <div class="card">
         <div class="card-title">Additional Occupants</div>
@@ -295,7 +362,7 @@
         <div class="check-group">
           <label class="check-row">
             <input type="checkbox" id="q-pets" onchange="togglePets()"/>
-            I have pets
+            I have one or more pets
           </label>
         </div>
         <div id="pet-fields" style="display:none">
@@ -305,7 +372,7 @@
               <div class="field"><label>Type</label><input type="text" id="pet0-type" placeholder="Dog, Cat, Bird…"/></div>
               <div class="field-row">
                 <div class="field"><label>Breed</label><input type="text" id="pet0-breed" placeholder="Labrador"/></div>
-                <div class="field"><label>Weight</label><input type="text" id="pet0-weight" placeholder="45 lbs"/></div>
+                <div class="field"><label>Weight (lbs)</label><input type="text" id="pet0-weight" placeholder="45"/></div>
               </div>
             </div>
           </div>
@@ -313,31 +380,31 @@
         </div>
         <div id="err1c" class="err-msg"></div>
       </div>
-      <button class="btn btn-primary" id="btn1c" onclick="goStep1d()">Next: Disclosures →</button>
-      <button class="btn btn-secondary" onclick="showAppStep('1b')">← Back</button>
+      <button class="btn btn-primary" id="btn1c" onclick="goStep1d()">Next: Background →</button>
+      <button class="btn btn-secondary" onclick="showStep('1b')">← Back</button>
     </div>
 
-    <!-- ── STEP 1d: Background & Disclosure ── -->
+    <!-- STEP 1d — Background + Disclosure + E-Sig -->
     <div id="step1d" style="display:none">
       <div class="card">
         <div class="card-title">Background Questions</div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Please answer all questions honestly. Incomplete or false information may result in denial.</p>
         <div class="check-group">
           <label class="check-row"><input type="checkbox" id="q-evicted"/> Have you ever been evicted?</label>
-          <label class="check-row"><input type="checkbox" id="q-bankruptcy"/> Have you filed for bankruptcy?</label>
-          <label class="check-row"><input type="checkbox" id="q-owes"/> Do you owe money to a previous landlord?</label>
+          <label class="check-row"><input type="checkbox" id="q-bankruptcy"/> Have you filed for bankruptcy in the last 7 years?</label>
+          <label class="check-row"><input type="checkbox" id="q-owes"/> Do you currently owe money to a previous landlord?</label>
         </div>
-        <div id="err1d" class="err-msg"></div>
       </div>
 
       <div class="card">
-        <div class="card-title">Authorization & Disclosure</div>
+        <div class="card-title">Authorization &amp; Disclosure</div>
         <div class="disclosure-box">
           <strong>Screening Authorization</strong><br/>
-          I authorize credit, background, eviction, identity, employment, and rental history verification. I understand that a consumer report may be obtained and used in connection with my application for tenancy.
+          I authorize my prospective landlord and their designated screening service to obtain a consumer report including credit history, criminal background, eviction records, employment verification, and rental history for the purpose of evaluating this rental application. I understand that a copy of the report may be provided upon request.
         </div>
         <div class="disclosure-strong">
-          <strong>Collection & Legal Disclosure</strong><br/>
-          In the event of unpaid rent, property damage, lease violations, judgments, or other amounts lawfully owed under the lease, I understand that identifying information — including information provided during this application process — may be used and disclosed to attorneys, courts, collection agencies, credit reporting agencies, or other authorized parties as permitted by law for the purpose of recovering amounts owed.
+          <strong>Collection &amp; Legal Disclosure</strong><br/>
+          In the event of unpaid rent, property damage, lease violations, judgments, or other amounts lawfully owed under the lease, identifying information — including information provided during this application — may be disclosed to attorneys, courts, collection agencies, credit reporting agencies, or other authorized parties as permitted by applicable law for the purpose of recovering amounts owed.
         </div>
         <div class="check-group" style="margin-bottom:20px">
           <label class="check-row">
@@ -346,90 +413,242 @@
           </label>
         </div>
         <div class="field">
-          <label for="e-sig">Electronic Signature — Type your full legal name</label>
+          <label for="e-sig">Electronic Signature — type your full legal name</label>
           <input id="e-sig" type="text" placeholder="Jane Smith" oninput="updateSigPreview()"/>
           <div class="sig-box" id="sig-preview"></div>
         </div>
-        <div id="err1d2" class="err-msg"></div>
+        <div id="err1d" class="err-msg"></div>
       </div>
-      <button class="btn btn-primary" id="btn1d" onclick="saveAppData()">Save & Continue →</button>
-      <button class="btn btn-secondary" onclick="showAppStep('1c')">← Back</button>
-      <div class="secure-note">🔒 Your application is encrypted and stored securely.</div>
+      <button class="btn btn-primary" id="btn1d" onclick="saveStep1()">Next: Employment →</button>
+      <button class="btn btn-secondary" onclick="showStep('1c')">← Back</button>
+      <div class="secure-note">🔒 Your application is encrypted and transmitted securely.</div>
     </div>
 
-    <!-- ── STEP 2: Identity Verification ── -->
-    <div id="step2" style="display:none">
+    <!-- STEP 2a — Employment -->
+    <div id="step2a" style="display:none">
       <div class="card">
-        <div class="card-title">Verify Your Identity</div>
+        <div class="card-title">Current Employment</div>
+        <div class="field">
+          <label for="employer">Employer Name</label>
+          <input id="employer" type="text" placeholder="Acme Corporation"/>
+        </div>
+        <div class="field">
+          <label for="position">Position / Job Title</label>
+          <input id="position" type="text" placeholder="Software Engineer"/>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="monthly-income">Monthly Income (USD)</label>
+            <input id="monthly-income" type="number" placeholder="5000" inputmode="decimal" min="0"/>
+            <div class="field-hint">Gross income before taxes.</div>
+          </div>
+          <div class="field">
+            <label for="emp-length">How long?</label>
+            <input id="emp-length" type="text" placeholder="2 years"/>
+          </div>
+        </div>
 
+        <div class="section-hdr">Supervisor Contact <span class="field-optional">optional</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label for="supervisor-name">Name</label>
+            <input id="supervisor-name" type="text" placeholder="Manager name"/>
+          </div>
+          <div class="field">
+            <label for="supervisor-phone">Phone</label>
+            <input id="supervisor-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
+          </div>
+        </div>
+
+        <div class="section-hdr">Previous Landlord <span class="field-optional">optional</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label for="prev-ll-name">Name</label>
+            <input id="prev-ll-name" type="text" placeholder="John Smith"/>
+          </div>
+          <div class="field">
+            <label for="prev-ll-phone">Phone</label>
+            <input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
+          </div>
+        </div>
+        <div id="err2a" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn2a" onclick="goStep2b()">Next: Documents →</button>
+      <button class="btn btn-secondary" onclick="showStep('1d')">← Back</button>
+    </div>
+
+    <!-- STEP 2b — Additional Income + Documents -->
+    <div id="step2b" style="display:none">
+      <div class="card">
+        <div class="card-title">Additional Income <span class="field-optional">optional</span></div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">List any other income sources (part-time work, benefits, alimony, investments, etc.)</p>
+        <div id="extra-income-container"></div>
+        <button class="btn btn-secondary" style="margin-bottom:0" onclick="addIncomeSource()" type="button">+ Add Income Source</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Supporting Documents <span class="field-optional">optional</span></div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Upload recent pay stubs, bank statements, or offer letters to strengthen your application.</p>
+
+        <div class="doc-upload-row" onclick="document.getElementById('upload-paystub').click()">
+          <div class="doc-upload-icon">💰</div>
+          <div class="doc-upload-label">Pay Stub (last 2 months)</div>
+          <div class="doc-upload-status" id="status-paystub">Tap to add</div>
+          <input type="file" id="upload-paystub" class="doc-upload-input" accept=".pdf,.jpg,.jpeg,.png" onchange="markAttached('paystub')"/>
+        </div>
+        <div class="doc-upload-row" onclick="document.getElementById('upload-bank').click()">
+          <div class="doc-upload-icon">🏦</div>
+          <div class="doc-upload-label">Bank Statement</div>
+          <div class="doc-upload-status" id="status-bank">Tap to add</div>
+          <input type="file" id="upload-bank" class="doc-upload-input" accept=".pdf,.jpg,.jpeg,.png" onchange="markAttached('bank')"/>
+        </div>
+        <div class="doc-upload-row" onclick="document.getElementById('upload-offer').click()">
+          <div class="doc-upload-icon">📋</div>
+          <div class="doc-upload-label">Offer Letter</div>
+          <div class="doc-upload-status" id="status-offer">Tap to add</div>
+          <input type="file" id="upload-offer" class="doc-upload-input" accept=".pdf,.jpg,.jpeg,.png" onchange="markAttached('offer')"/>
+        </div>
+        <div id="err2b" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn2b" onclick="saveStep2()">Next: Screening →</button>
+      <button class="btn btn-secondary" onclick="showStep('2a')">← Back</button>
+    </div>
+
+    <!-- STEP 3 — Screening & Identity -->
+    <div id="step3" style="display:none">
+
+      <!-- Identity Verification -->
+      <div class="card" id="verify-card">
+        <div class="card-title">Identity Verification</div>
         <div class="verify-info">
           <div class="verify-icon-wrap">🪪</div>
-          <div class="verify-heading">ID Verification Required</div>
-          <div class="verify-subtext">Your landlord requires identity verification before signing the lease. This takes about 2 minutes.</div>
+          <div class="verify-heading">Verify Your Identity</div>
+          <div class="verify-subtext">Quick 2-minute photo ID check. Have your driver's license or passport ready.</div>
           <div class="verify-items">
-            <div class="verify-item">📄 &nbsp;A government-issued ID (driver's license or passport)</div>
+            <div class="verify-item">📄 &nbsp;Government-issued ID (driver's license or passport)</div>
             <div class="verify-item">🤳 &nbsp;A quick selfie to match your ID</div>
             <div class="verify-item">💡 &nbsp;Good lighting and a steady hand</div>
           </div>
         </div>
-
-        <div id="err2" class="err-msg"></div>
+        <div id="verify-done" class="screening-verified" style="display:none">
+          <div class="sv-icon">✅</div>
+          <div class="sv-text">Identity verified successfully!</div>
+        </div>
+        <div id="err3-verify" class="err-msg"></div>
+        <button class="btn btn-primary" id="btn3-verify" onclick="startVerification()" style="margin-top:8px">Verify My Identity →</button>
+        <div class="secure-note" style="margin-top:8px">🔒 Powered by Stripe Identity — documents never stored by your landlord.</div>
       </div>
 
-      <button class="btn btn-primary" id="btn2" onclick="startVerification()">Verify My Identity →</button>
-      <button class="btn btn-secondary" onclick="goBack('1d')">← Back</button>
-      <div class="secure-note">🔒 Powered by Stripe Identity — your documents are never stored by your landlord.</div>
-    </div>
+      <!-- Credit & Background Check -->
+      <div class="card" id="screening-card">
+        <div class="card-title">Credit &amp; Background Screening</div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Your landlord requires a full screening report. This is completed through a secure third-party provider. <strong>You pay the fee directly</strong> — your landlord never sees your payment details.</p>
 
-    <!-- ── STEP 3: Lease Dates ── -->
-    <div id="step3" style="display:none">
-      <div class="card">
-        <div class="card-title">Your Lease</div>
-
-        <div class="field">
-          <label for="lease-start">Lease Start Date</label>
-          <div class="date-wrap">
-            <input id="lease-start" type="date"/>
-            <span class="date-icon">📅</span>
+        <div class="screening-provider">
+          <div class="sp-header">
+            <div class="sp-icon">🏠</div>
+            <div>
+              <span class="sp-name">TransUnion SmartMove</span>
+              <span class="sp-tag">RECOMMENDED</span>
+            </div>
           </div>
-        </div>
-        <div class="field">
-          <label for="lease-end">Lease End Date <span class="field-optional">(optional)</span></label>
-          <div class="date-wrap">
-            <input id="lease-end" type="date"/>
-            <span class="date-icon">📅</span>
+          <div class="sp-desc">Instant credit, criminal, and eviction reports trusted by landlords nationwide.</div>
+          <div class="sp-items">
+            <div class="sp-item"><span>✅</span><span>Full credit report &amp; score</span></div>
+            <div class="sp-item"><span>✅</span><span>National criminal background check</span></div>
+            <div class="sp-item"><span>✅</span><span>Eviction history search</span></div>
+            <div class="sp-item"><span>✅</span><span>Results shared directly with landlord</span></div>
           </div>
-          <div class="field-hint">Leave blank for month-to-month leases.</div>
+          <div class="sp-price">From $25 — paid by you at checkout</div>
         </div>
 
-        <div id="err3" class="err-msg"></div>
+        <button class="btn btn-secondary" onclick="openSmartMove()" type="button">Open SmartMove →</button>
+
+        <div style="margin-top:8px;margin-bottom:0">
+          <label class="check-row">
+            <input type="checkbox" id="screening-authorized"/>
+            I have authorized and submitted my screening application.
+          </label>
+        </div>
+        <div id="err3-screening" class="err-msg"></div>
       </div>
 
-      <button class="btn btn-primary" id="btn3" onclick="goStep4()">Next: Set Up Auto-Pay →</button>
-      <button class="btn btn-secondary" onclick="goBack(2)">← Back</button>
+      <button class="btn btn-success" id="btn3-submit" onclick="completePhase1()">Submit Application →</button>
+      <button class="btn btn-secondary" onclick="showStep('2b')">← Back</button>
+      <div class="secure-note">🔒 Your application is securely submitted to your landlord for review.</div>
     </div>
 
-    <!-- ── STEP 4: Payment Setup ── -->
+    <!-- Phase 1 Complete -->
+    <div id="p1-complete" class="success-view">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Application Submitted!</div>
+      <div class="success-body">Your rental application has been received. Your landlord will review and respond within 1–3 business days.</div>
+      <div class="success-detail" id="p1-summary"></div>
+      <p style="font-size:13px;color:#9CA3AF;line-height:1.6">You'll receive a separate link by email once your landlord makes a decision. No action needed from you right now.</p>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════
+         PHASE 2 — LEASE SETUP (loaded via ?phase2token=)
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- STEP 4 — Insurance -->
     <div id="step4" style="display:none">
       <div class="card">
-        <div class="card-title">Auto-Pay Setup</div>
+        <div class="card-title">Insurance Requirements</div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Review your landlord's insurance requirements for this unit before proceeding.</p>
 
+        <!-- Renters Insurance -->
+        <div class="insurance-card" id="ri-card">
+          <div class="ic-header">
+            <div class="ic-icon">🛡️</div>
+            <div class="ic-title">Renters Insurance</div>
+            <div class="ic-badge" id="ri-badge">—</div>
+          </div>
+          <div class="ic-desc">Protects your belongings and provides liability coverage.</div>
+          <div class="ic-examples">Covers: property damage • fire • water damage • personal injury claims</div>
+          <div class="ic-confirm" id="ri-confirm"></div>
+        </div>
+
+        <!-- Rent Guarantee -->
+        <div class="insurance-card" id="rg-card" style="display:none">
+          <div class="ic-header">
+            <div class="ic-icon">🏦</div>
+            <div class="ic-title">Rent Guarantee</div>
+            <div class="ic-badge" id="rg-badge">—</div>
+          </div>
+          <div class="ic-desc">Protects against rent default, lease breaks, and eviction expenses.</div>
+          <div class="ic-examples">Covers: rent default • lease break • eviction expenses</div>
+          <div class="ic-confirm" id="rg-confirm"></div>
+        </div>
+
+        <div id="err4" class="err-msg"></div>
+      </div>
+      <button class="btn btn-primary" id="btn4" onclick="saveInsurance()">Continue to Payment →</button>
+    </div>
+
+    <!-- STEP 5 — Payment -->
+    <div id="step5" style="display:none">
+      <div class="card">
+        <div class="card-title">Auto-Pay Setup</div>
         <div class="autopay-box">
           <div class="autopay-box-title">📅 How automatic payments work</div>
-          <div class="autopay-row"><span>✅</span><span>Your rent is charged automatically on the <strong>1st of each month</strong></span></div>
-          <div class="autopay-row"><span>⏳</span><span>Grace period until the <strong>5th</strong> — no penalty if processed within 5 days</span></div>
-          <div class="autopay-row"><span>🔄</span><span>If bank transfer fails, your <strong>debit card is charged as backup</strong></span></div>
-          <div class="autopay-row"><span>📱</span><span>You'll receive a <strong>text and email</strong> for every payment or issue</span></div>
+          <div class="autopay-row"><span>✅</span><span>Rent charged automatically on the <strong>1st of each month</strong></span></div>
+          <div class="autopay-row"><span>⏳</span><span>Grace period until the <strong>5th</strong> — no penalty within 5 days</span></div>
+          <div class="autopay-row"><span>🔄</span><span>If bank transfer fails, <strong>debit card charged as backup</strong></span></div>
+          <div class="autopay-row"><span>📱</span><span><strong>Text and email</strong> for every payment or issue</span></div>
+        </div>
+
+        <div class="disclosure-box" style="font-size:12px;margin-bottom:16px">
+          By enabling automatic payments you authorize recurring monthly charges for rent and applicable fees. A processing fee may apply to card transactions.
         </div>
 
         <div class="card-title" style="margin-top:4px">Choose Payment Method</div>
-
         <div class="pay-methods">
           <div class="pay-method selected" id="pm-bank" onclick="selectPayMethod('bank')">
             <div class="pay-method-icon">🏦</div>
             <div class="pay-method-info">
               <div class="pay-method-name">Bank Transfer (ACH)</div>
-              <div class="pay-method-desc">Direct from your checking or savings</div>
+              <div class="pay-method-desc">Direct from checking or savings</div>
             </div>
             <div class="pay-method-badge badge-free">FREE</div>
           </div>
@@ -450,60 +669,61 @@
             <div class="pay-method-badge badge-fee">+FEE</div>
           </div>
         </div>
-
         <div id="payment-element-wrap" class="loading" style="display:none">
           <div class="spinner"></div> Loading secure payment form…
         </div>
         <div id="payment-element"></div>
-
-        <div id="err4" class="err-msg"></div>
-      </div>
-
-      <button class="btn btn-primary" id="btn4-init" onclick="initPayment()">Continue to Payment →</button>
-      <button class="btn btn-primary" id="btn4-confirm" style="display:none" onclick="confirmPayment()">Authorize Auto-Pay 🔒</button>
-      <button class="btn btn-secondary" onclick="goBack(3)">← Back</button>
-      <div class="secure-note">🔒 Payments processed securely by Stripe. Your landlord never sees your card number.</div>
-    </div>
-
-    <!-- ── STEP 5: Sign Lease ── -->
-    <div id="step5" style="display:none">
-      <div class="card">
-        <div class="card-title">Review &amp; Sign Your Lease</div>
-
-        <table id="lease-summary" class="lease-summary"></table>
-
-        <p style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:20px">
-          By signing electronically you confirm you have read and agree to all lease terms.
-          Your e-signature is legally binding under the ESIGN Act.
-        </p>
-
         <div id="err5" class="err-msg"></div>
       </div>
+      <button class="btn btn-primary" id="btn5-init" onclick="initPayment()">Continue to Payment →</button>
+      <button class="btn btn-primary" id="btn5-confirm" style="display:none" onclick="confirmPayment()">Authorize Auto-Pay 🔒</button>
+      <button class="btn btn-secondary" onclick="showStep('4')">← Back</button>
+      <div class="secure-note">🔒 Powered by Stripe. Your landlord never sees your payment details.</div>
+    </div>
 
-      <button class="btn-docusign" id="btn5" onclick="startSigning()">
-        <span class="ds-logo">✍️</span> Sign Lease with DocuSign
+    <!-- STEP 6 — Lease Signing -->
+    <div id="step6" style="display:none">
+      <div class="card">
+        <div class="card-title">Review &amp; Sign Your Lease</div>
+        <table id="lease-summary" class="lease-summary"></table>
+        <p style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:20px">
+          By signing electronically you confirm you have read and agree to all lease terms. Your e-signature is legally binding under the ESIGN Act.
+        </p>
+        <div id="err6" class="err-msg"></div>
+      </div>
+      <button class="btn-docusign" id="btn6" onclick="startSigning()">
+        <span>✍️</span> Sign Lease with DocuSign
       </button>
       <div class="secure-note">🔒 Powered by DocuSign — the world's #1 e-signature platform.</div>
     </div>
 
-    <!-- ── Success ── -->
-    <div class="success" id="success-view">
-      <div class="success-icon">🎉</div>
-      <div class="success-title" id="success-title">You're all set!</div>
-      <div class="success-body" id="success-body"></div>
+    <!-- Phase 2 Complete -->
+    <div id="p2-complete" class="success-view">
+      <div class="success-icon">🏠</div>
+      <div class="success-title">You're all set!</div>
+      <div class="success-body">Your lease is signed, payment is set up, and you're ready to move in. Welcome home!</div>
+      <div class="success-detail" id="p2-summary"></div>
     </div>
 
   </div><!-- #main -->
 </div>
 
 <script>
-var API_BASE = 'https://iykkkfcwuparqtomyaow.supabase.co/functions/v1/tenant-onboarding';
-var token    = new URLSearchParams(window.location.search).get('token') || '';
-var busy     = false;
-var stripe   = null;
-var elements = null;
-var inviteInfo = {};
+var API_BASE        = 'https://iykkkfcwuparqtomyaow.supabase.co/functions/v1/tenant-onboarding';
+var PORTAL_URL      = 'https://scapsa0116.github.io/landlord-tenant-portal/onboarding.html';
+var params          = new URLSearchParams(window.location.search);
+var isPhase2        = !!params.get('phase2token');
+var token           = isPhase2 ? null  : (params.get('token') || '');
+var phase2Token     = isPhase2 ? (params.get('phase2token') || '') : null;
+var busy            = false;
+var stripe          = null;
+var elements        = null;
+var inviteInfo      = {};
 var selectedPayMethod = 'bank';
+var identityDone    = false;
+var petCount        = 1;
+var incomeRowCount  = 0;
+var attachedDocs    = {};
 
 // ── Utilities ─────────────────────────────────────────────────
 
@@ -516,6 +736,7 @@ function showError(msg) {
 
 function setErr(id, msg) {
   var el = document.getElementById(id);
+  if (!el) return;
   el.textContent = msg;
   el.classList.toggle('on', !!msg);
 }
@@ -527,50 +748,55 @@ function setBtn(id, disabled, html) {
   if (html != null) btn.innerHTML = html;
 }
 
-function formatDate(str) {
-  if (!str) return '—';
-  var d = new Date(str + 'T00:00:00');
-  return isNaN(d) ? str : d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
+function v(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function chk(id) { var el = document.getElementById(id); return el ? el.checked : false; }
 
-// ── Step navigation ───────────────────────────────────────────
+// ── Progress bar ──────────────────────────────────────────────
 
-function updateSteps(active) {
-  for (var i = 1; i <= 5; i++) {
-    var item = document.getElementById('step-' + i + '-item');
-    var dot  = document.getElementById('dot-' + i);
+var PHASE1_LABELS = ['Personal Info', 'Employment', 'Screening'];
+var PHASE2_LABELS = ['Insurance', 'Payment', 'Sign'];
+
+function updateProgressBar(active) {
+  var labels = isPhase2 ? PHASE2_LABELS : PHASE1_LABELS;
+  for (var i = 1; i <= 3; i++) {
+    var item = document.getElementById('pb-item-' + i);
+    var dot  = document.getElementById('pb-dot-' + i);
+    var lbl  = document.getElementById('pb-lbl-' + i);
     if (!item) continue;
     item.className = 'step-item' + (i < active ? ' done' : i === active ? ' active' : '');
-    dot.textContent = i < active ? '✓' : String(i);
+    dot.textContent  = i < active ? '✓' : String(i);
+    if (lbl) lbl.textContent = labels[i - 1];
   }
 }
 
-// Application sub-steps map to main progress step 1
-var APP_SUB_STEPS = ['1a','1b','1c','1d'];
+var ALL_STEPS = ['1a','1b','1c','1d','2a','2b','3','4','5','6','p1-complete','p2-complete'];
 
 function showStep(n) {
-  // Hide all sub-steps and main steps
-  APP_SUB_STEPS.forEach(function(s) {
+  ALL_STEPS.forEach(function(s) {
     var el = document.getElementById('step' + s);
     if (el) el.style.display = 'none';
   });
-  for (var i = 2; i <= 5; i++) {
-    var el = document.getElementById('step' + i);
-    if (el) el.style.display = 'none';
-  }
-  // Show target
   var target = document.getElementById('step' + n);
-  if (target) target.style.display = '';
-  // Progress bar: sub-steps = bar step 1; others = their number
-  var barStep = (APP_SUB_STEPS.indexOf(String(n)) >= 0) ? 1 : Number(n);
-  updateSteps(barStep);
+  if (target) { target.style.display = ''; target.className = target.className; }
+
+  var barStep;
+  if (['1a','1b','1c','1d'].indexOf(String(n)) >= 0) barStep = 1;
+  else if (['2a','2b'].indexOf(String(n)) >= 0)      barStep = 2;
+  else if (n === '3')                                 barStep = 3;
+  else if (n === '4')                                 barStep = 1;
+  else if (n === '5')                                 barStep = 2;
+  else if (n === '6')                                 barStep = 3;
+  else { barStep = 4; }  // complete views
+  if (n === 'p1-complete' || n === 'p2-complete') {
+    document.getElementById('step-bar').style.display = 'none';
+  } else {
+    document.getElementById('step-bar').style.display = '';
+    updateProgressBar(barStep);
+  }
   window.scrollTo(0, 0);
 }
 
-function showAppStep(sub) { showStep(sub); }
-function goBack(n) { showStep(n); }
-
-// ── DOB selects population ────────────────────────────────────
+// ── DOB selects ───────────────────────────────────────────────
 (function() {
   var dayEl = document.getElementById('dob-day');
   var yrEl  = document.getElementById('dob-year');
@@ -588,33 +814,7 @@ function goBack(n) { showStep(n); }
   }
 })();
 
-// ── Application sub-step navigation ──────────────────────────
-function goStep1b() {
-  setErr('err1a', '');
-  var name  = document.getElementById('name').value.trim();
-  var email = document.getElementById('email').value.trim();
-  if (!name)  { setErr('err1a', 'Please enter your full name.'); return; }
-  if (!email || !email.includes('@')) { setErr('err1a', 'Please enter a valid email address.'); return; }
-  showAppStep('1b');
-}
-
-function goStep1c() {
-  setErr('err1b', '');
-  var income = document.getElementById('monthly-income').value.trim();
-  var emp    = document.getElementById('employer').value.trim();
-  if (!emp)    { setErr('err1b', 'Please enter your employer name.'); return; }
-  if (!income || Number(income) <= 0) { setErr('err1b', 'Please enter your monthly income.'); return; }
-  showAppStep('1c');
-}
-
-function goStep1d() {
-  setErr('err1c', '');
-  showAppStep('1d');
-}
-
 // ── Occupants ─────────────────────────────────────────────────
-var petCount = 1;
-
 function updateOccupants() {
   var n   = parseInt(document.getElementById('num-occupants').value) || 0;
   var box = document.getElementById('occupants-container');
@@ -628,14 +828,30 @@ function updateOccupants() {
           '<div class="field"><label>First Name</label><input type="text" id="occ' + idx + '-first" placeholder="First"/></div>' +
           '<div class="field"><label>Last Name</label><input type="text" id="occ' + idx + '-last" placeholder="Last"/></div>' +
         '</div>' +
+        '<div class="field"><label>Relationship</label><input type="text" id="occ' + idx + '-relation" placeholder="Spouse, Child, Roommate…"/></div>' +
         '<div class="field"><label>Date of Birth</label><input type="date" id="occ' + idx + '-dob"/></div>' +
         '<div class="field-row">' +
           '<div class="field"><label>Email</label><input type="email" id="occ' + idx + '-email" placeholder="email@example.com"/></div>' +
           '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
         '</div>' +
-        '<div class="field"><label>Employer</label><input type="text" id="occ' + idx + '-employer" placeholder="Employer or school"/></div>' +
       '</div>';
   }
+}
+
+function collectOccupants() {
+  var n = parseInt(v('num-occupants')) || 0;
+  var list = [];
+  for (var i = 1; i <= n; i++) {
+    list.push({
+      first_name:   (document.getElementById('occ' + i + '-first')?.value    || '').trim(),
+      last_name:    (document.getElementById('occ' + i + '-last')?.value     || '').trim(),
+      relationship: (document.getElementById('occ' + i + '-relation')?.value || '').trim(),
+      dob:          (document.getElementById('occ' + i + '-dob')?.value      || ''),
+      email:        (document.getElementById('occ' + i + '-email')?.value    || '').trim(),
+      phone:        (document.getElementById('occ' + i + '-phone')?.value    || '').trim(),
+    });
+  }
+  return list;
 }
 
 // ── Pets ──────────────────────────────────────────────────────
@@ -649,65 +865,187 @@ function addPet() {
   var idx = petCount;
   var div = document.createElement('div');
   div.className = 'pet-block';
-  div.id = 'pet-' + idx;
   div.innerHTML =
     '<div class="pet-label">Pet ' + (idx + 1) + '</div>' +
     '<div class="field"><label>Type</label><input type="text" id="pet' + idx + '-type" placeholder="Dog, Cat…"/></div>' +
     '<div class="field-row">' +
-      '<div class="field"><label>Breed</label><input type="text" id="pet' + idx + '-breed" placeholder="Labrador"/></div>' +
-      '<div class="field"><label>Weight</label><input type="text" id="pet' + idx + '-weight" placeholder="45 lbs"/></div>' +
+      '<div class="field"><label>Breed</label><input type="text" id="pet' + idx + '-breed"/></div>' +
+      '<div class="field"><label>Weight (lbs)</label><input type="text" id="pet' + idx + '-weight"/></div>' +
     '</div>';
   c.appendChild(div);
   petCount++;
 }
 
-// ── Signature preview ─────────────────────────────────────────
-function updateSigPreview() {
-  var sig = document.getElementById('e-sig').value;
-  var el  = document.getElementById('sig-preview');
-  if (el) el.textContent = sig || '';
-}
-
-// ── Save application data then go to verify / lease ──────────
-async function saveAppData() {
-  setErr('err1d',  '');
-  setErr('err1d2', '');
-  var agree = document.getElementById('disclosure-agree').checked;
-  var sig   = document.getElementById('e-sig').value.trim();
-  if (!agree) { setErr('err1d2', 'You must agree to the disclosure to continue.'); return; }
-  if (!sig)   { setErr('err1d2', 'Please type your full legal name as your electronic signature.'); return; }
-
-  // Collect occupants
-  var numOcc   = parseInt(document.getElementById('num-occupants').value) || 0;
-  var occupants = [];
-  for (var i = 1; i <= numOcc; i++) {
-    occupants.push({
-      first_name: (document.getElementById('occ' + i + '-first')?.value || '').trim(),
-      last_name:  (document.getElementById('occ' + i + '-last')?.value  || '').trim(),
-      dob:        (document.getElementById('occ' + i + '-dob')?.value   || ''),
-      email:      (document.getElementById('occ' + i + '-email')?.value || '').trim(),
-      phone:      (document.getElementById('occ' + i + '-phone')?.value || '').trim(),
-      employer:   (document.getElementById('occ' + i + '-employer')?.value || '').trim(),
-    });
-  }
-
-  // Collect pets
+function collectPets() {
   var hasPets = document.getElementById('q-pets').checked;
-  var pets = [];
+  var list = [];
   if (hasPets) {
     for (var j = 0; j < petCount; j++) {
-      var t = document.getElementById('pet' + j + '-type')?.value?.trim();
-      if (t) {
-        pets.push({
-          type:   t,
-          breed:  (document.getElementById('pet' + j + '-breed')?.value  || '').trim(),
-          weight: (document.getElementById('pet' + j + '-weight')?.value || '').trim(),
-        });
-      }
+      var t = (document.getElementById('pet' + j + '-type')?.value || '').trim();
+      if (t) list.push({
+        type:   t,
+        breed:  (document.getElementById('pet' + j + '-breed')?.value  || '').trim(),
+        weight: (document.getElementById('pet' + j + '-weight')?.value || '').trim(),
+      });
     }
   }
+  return list;
+}
 
-  // DOB
+// ── Signature preview ─────────────────────────────────────────
+function updateSigPreview() {
+  var el = document.getElementById('sig-preview');
+  if (el) el.textContent = v('e-sig') || '';
+}
+
+// ── Additional income sources ─────────────────────────────────
+function addIncomeSource() {
+  var c   = document.getElementById('extra-income-container');
+  var idx = incomeRowCount++;
+  var div = document.createElement('div');
+  div.className = 'occupant-block';
+  div.innerHTML =
+    '<div class="field-row">' +
+      '<div class="field"><label>Source</label><input type="text" id="income' + idx + '-src" placeholder="Part-time job, Freelance…"/></div>' +
+      '<div class="field"><label>Monthly (USD)</label><input type="number" id="income' + idx + '-amt" placeholder="500" inputmode="decimal"/></div>' +
+    '</div>';
+  c.appendChild(div);
+}
+
+function collectAdditionalIncome() {
+  var list = [];
+  for (var i = 0; i < incomeRowCount; i++) {
+    var src = (document.getElementById('income' + i + '-src')?.value || '').trim();
+    var amt = document.getElementById('income' + i + '-amt')?.value;
+    if (src) list.push({ source: src, amount: Number(amt) || 0 });
+  }
+  return list;
+}
+
+// ── Doc upload ────────────────────────────────────────────────
+function markAttached(key) {
+  var input = document.getElementById('upload-' + key);
+  if (input && input.files && input.files[0]) {
+    attachedDocs[key] = input.files[0].name;
+    var status = document.getElementById('status-' + key);
+    if (status) {
+      status.textContent = '✓ ' + input.files[0].name.substring(0, 20);
+      status.className = 'doc-upload-status doc-attached';
+    }
+  }
+}
+
+// ── SmartMove link ────────────────────────────────────────────
+function openSmartMove() {
+  window.open('https://www.mysmartmove.com', '_blank');
+}
+
+// ── PHASE 1 LOAD ──────────────────────────────────────────────
+async function loadPhase1() {
+  if (!token) { showError('No invite token found. Please use the link from your landlord\'s email.'); return; }
+  try {
+    var res  = await fetch(API_BASE + '?action=info&token=' + encodeURIComponent(token));
+    var json = await res.json();
+    if (json.error) { showError(json.error); return; }
+    inviteInfo = json;
+
+    // If already submitted and approved, redirect to phase 2 hint
+    if (json.decision === 'pre_approved' && json.phase2Token) {
+      showError('Your application has been approved! Check your email for the lease setup link.');
+      return;
+    }
+    if (json.applicationSubmitted) {
+      showStep('p1-complete');
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main').style.display = '';
+      return;
+    }
+
+    // Init hero
+    document.getElementById('hero-eyebrow').textContent = 'Rental Application';
+    document.getElementById('hero-title').textContent   = 'Hi, let\'s get started!';
+    document.getElementById('hero-loc').textContent     =
+      (json.buildingName ? json.buildingName + ' · ' : '') + 'Unit ' + json.unitNumber;
+    document.getElementById('rent-chip').textContent    =
+      '$' + Number(json.rent).toLocaleString() + '/mo';
+
+    // Init Stripe
+    if (json.stripePublishableKey) stripe = Stripe(json.stripePublishableKey);
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').style.display    = '';
+    showStep('1a');
+  } catch (e) {
+    showError('Unable to load your application. Please check your connection and try again.');
+  }
+}
+
+// ── PHASE 2 LOAD ──────────────────────────────────────────────
+async function loadPhase2() {
+  if (!phase2Token) { showError('Invalid lease setup link.'); return; }
+  try {
+    var res  = await fetch(API_BASE + '?action=get-phase2-info&phase2token=' + encodeURIComponent(phase2Token));
+    var json = await res.json();
+    if (json.error) { showError(json.error); return; }
+    inviteInfo = json;
+
+    // Update labels to Phase 2
+    document.getElementById('hero-eyebrow').textContent = 'Lease Setup';
+    document.getElementById('hero-title').textContent   = 'Welcome back, ' + (json.tenantFirstName || 'Tenant') + '!';
+    document.getElementById('hero-loc').textContent     =
+      (json.buildingName ? json.buildingName + ' · ' : '') + 'Unit ' + json.unitNumber;
+    document.getElementById('rent-chip').textContent    =
+      '$' + Number(json.rent).toLocaleString() + '/mo';
+
+    // Init Stripe
+    if (json.stripePublishableKey) stripe = Stripe(json.stripePublishableKey);
+
+    // Update progress bar labels to Phase 2
+    isPhase2 = true;
+
+    // Render insurance step
+    renderInsuranceStep(json.insuranceConfig || {});
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('main').style.display    = '';
+    showStep('4');
+  } catch (e) {
+    showError('Unable to load lease setup. Please check your connection and try again.');
+  }
+}
+
+// ── STEP 1 NAVIGATION ─────────────────────────────────────────
+function goStep1b() {
+  setErr('err1a', '');
+  if (!v('first-name')) { setErr('err1a', 'Please enter your first name.'); return; }
+  if (!v('last-name'))  { setErr('err1a', 'Please enter your last name.'); return; }
+  if (!v('email') || !v('email').includes('@')) { setErr('err1a', 'Please enter a valid email address.'); return; }
+  if (!v('phone'))      { setErr('err1a', 'Please enter your phone number.'); return; }
+  showStep('1b');
+}
+
+function goStep1c() {
+  setErr('err1b', '');
+  if (!v('addr-street')) { setErr('err1b', 'Please enter your current street address.'); return; }
+  if (!v('addr-city'))   { setErr('err1b', 'Please enter your city.'); return; }
+  if (!v('addr-state'))  { setErr('err1b', 'Please select your state.'); return; }
+  if (!v('addr-zip'))    { setErr('err1b', 'Please enter your ZIP code.'); return; }
+  if (!v('ec-name'))     { setErr('err1b', 'Please enter an emergency contact name.'); return; }
+  if (!v('ec-phone'))    { setErr('err1b', 'Please enter an emergency contact phone.'); return; }
+  showStep('1c');
+}
+
+function goStep1d() {
+  setErr('err1c', '');
+  showStep('1d');
+}
+
+// ── SAVE STEP 1 (called at end of 1d) ────────────────────────
+async function saveStep1() {
+  setErr('err1d', '');
+  if (!chk('disclosure-agree')) { setErr('err1d', 'You must agree to both disclosures to continue.'); return; }
+  if (!v('e-sig'))               { setErr('err1d', 'Please type your full legal name as your electronic signature.'); return; }
+
   var dobM = document.getElementById('dob-month').value;
   var dobD = document.getElementById('dob-day').value;
   var dobY = document.getElementById('dob-year').value;
@@ -715,53 +1053,266 @@ async function saveAppData() {
 
   setBtn('btn1d', true, '<span class="spinner"></span> Saving…');
   busy = true;
+  try {
+    var res  = await fetch(API_BASE + '?action=save-step1', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        token,
+        first_name:          v('first-name'),
+        last_name:           v('last-name'),
+        date_of_birth:       dob,
+        email:               v('email'),
+        phone:               v('phone'),
+        drivers_license:     v('drivers-license'),
+        address_street:      v('addr-street'),
+        address_city:        v('addr-city'),
+        address_state:       document.getElementById('addr-state').value,
+        address_zip:         v('addr-zip'),
+        previous_address: {
+          street:    v('prev-addr-street'),
+          city:      v('prev-addr-city'),
+          state:     document.getElementById('prev-addr-state').value,
+          zip:       v('prev-addr-zip'),
+          duration:  v('prev-addr-duration'),
+        },
+        emergency_contact: {
+          name:         v('ec-name'),
+          phone:        v('ec-phone'),
+          relationship: v('ec-relation'),
+        },
+        num_occupants:       parseInt(v('num-occupants')) || 0,
+        occupants:           collectOccupants(),
+        has_pets:            chk('q-pets'),
+        pets:                collectPets(),
+        evicted:             chk('q-evicted'),
+        bankruptcy:          chk('q-bankruptcy'),
+        owes_landlord:       chk('q-owes'),
+        disclosure_agreed:   true,
+        electronic_signature: v('e-sig'),
+      }),
+    });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+    setBtn('btn1d', false, 'Next: Employment →');
+    busy = false;
+    showStep('2a');
+  } catch (err) {
+    setErr('err1d', err.message || 'Could not save. Please try again.');
+    setBtn('btn1d', false, 'Next: Employment →');
+    busy = false;
+  }
+}
+
+// ── STEP 2 NAVIGATION ─────────────────────────────────────────
+function goStep2b() {
+  setErr('err2a', '');
+  if (!v('employer'))       { setErr('err2a', 'Please enter your employer name.'); return; }
+  if (!v('position'))       { setErr('err2a', 'Please enter your position/job title.'); return; }
+  var inc = Number(document.getElementById('monthly-income').value);
+  if (!inc || inc <= 0)     { setErr('err2a', 'Please enter your monthly income.'); return; }
+  showStep('2b');
+}
+
+// ── SAVE STEP 2 (called at end of 2b) ────────────────────────
+async function saveStep2() {
+  setErr('err2b', '');
+  setBtn('btn2b', true, '<span class="spinner"></span> Saving…');
+  busy = true;
+  try {
+    var res  = await fetch(API_BASE + '?action=save-step2', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        token,
+        employer:            v('employer'),
+        position:            v('position'),
+        monthly_income:      Number(document.getElementById('monthly-income').value) || null,
+        employment_length:   v('emp-length'),
+        supervisor_name:     v('supervisor-name'),
+        supervisor_phone:    v('supervisor-phone'),
+        prev_landlord_name:  v('prev-ll-name'),
+        prev_landlord_phone: v('prev-ll-phone'),
+        additional_income:   collectAdditionalIncome(),
+        documents_attached:  Object.keys(attachedDocs),
+      }),
+    });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+    setBtn('btn2b', false, 'Next: Screening →');
+    busy = false;
+    showStep('3');
+  } catch (err) {
+    setErr('err2b', err.message || 'Could not save. Please try again.');
+    setBtn('btn2b', false, 'Next: Screening →');
+    busy = false;
+  }
+}
+
+// ── STEP 3: Identity Verification ────────────────────────────
+async function startVerification() {
+  if (busy) return;
+  setErr('err3-verify', '');
+  busy = true;
+  setBtn('btn3-verify', true, '<span class="spinner"></span> Preparing…');
 
   try {
-    var res  = await fetch(API_BASE + '?action=save-app-data', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    var res  = await fetch(API_BASE + '?action=create-verification-session', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token: token, email: v('email') }),
+    });
+    var json = await res.json();
+    if (json.noVerification) {
+      identityDone = true;
+      document.getElementById('verify-card').style.display = 'none';
+      setBtn('btn3-verify', false, 'Verify My Identity →');
+      busy = false; return;
+    }
+    if (json.error) throw new Error(json.error);
+    if (!stripe) throw new Error('Stripe not initialized.');
+
+    setBtn('btn3-verify', false, 'Verify My Identity →');
+    busy = false;
+
+    var modal = await stripe.verifyIdentity(json.clientSecret);
+    if (modal.error) { setErr('err3-verify', modal.error.message); return; }
+
+    identityDone = true;
+    document.getElementById('btn3-verify').style.display = 'none';
+    document.getElementById('verify-done').style.display = '';
+  } catch (err) {
+    setErr('err3-verify', err.message || 'Could not start verification.');
+    setBtn('btn3-verify', false, 'Verify My Identity →');
+    busy = false;
+  }
+}
+
+// ── COMPLETE PHASE 1 ─────────────────────────────────────────
+async function completePhase1() {
+  setErr('err3-screening', '');
+  if (!chk('screening-authorized') && !identityDone) {
+    setErr('err3-screening', 'Please verify your identity and authorize your screening before submitting.');
+    return;
+  }
+  if (!chk('screening-authorized')) {
+    setErr('err3-screening', 'Please check the box confirming you have authorized your screening.');
+    return;
+  }
+
+  setBtn('btn3-submit', true, '<span class="spinner"></span> Submitting application…');
+  busy = true;
+  try {
+    var res  = await fetch(API_BASE + '?action=complete-phase1', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
-        token:               token,
-        date_of_birth:       dob,
-        address_street:      document.getElementById('addr-street').value.trim(),
-        address_city:        document.getElementById('addr-city').value.trim(),
-        address_state:       document.getElementById('addr-state').value,
-        address_zip:         document.getElementById('addr-zip').value.trim(),
-        employer:            document.getElementById('employer').value.trim(),
-        position:            document.getElementById('position').value.trim(),
-        monthly_income:      Number(document.getElementById('monthly-income').value) || null,
-        prev_landlord_name:  document.getElementById('prev-ll-name').value.trim(),
-        prev_landlord_phone: document.getElementById('prev-ll-phone').value.trim(),
-        num_occupants:       numOcc,
-        occupants,
-        evicted:             document.getElementById('q-evicted').checked,
-        bankruptcy:          document.getElementById('q-bankruptcy').checked,
-        owes_landlord:       document.getElementById('q-owes').checked,
-        has_pets:            hasPets,
-        pets,
-        disclosure_agreed:   true,
-        electronic_signature: sig,
+        token,
+        screening_authorized: true,
+        identity_done: identityDone,
       }),
     });
     var json = await res.json();
     if (json.error) throw new Error(json.error);
 
-    setBtn('btn1d', false, 'Save & Continue →');
+    // Show Phase 1 success
+    var summaryEl = document.getElementById('p1-summary');
+    if (summaryEl && json.summary) {
+      summaryEl.innerHTML =
+        row('Applicant', json.summary.name || '—') +
+        row('Unit', json.summary.unit || '—') +
+        row('Monthly Rent', json.summary.rent ? '$' + Number(json.summary.rent).toLocaleString() + '/mo' : '—') +
+        row('Submitted', new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'}));
+    }
+    document.getElementById('main').style.display = '';
+    showStep('p1-complete');
+    setBtn('btn3-submit', false, 'Submit Application →');
     busy = false;
-
-    if (!inviteInfo.hasVerification) { showStep(3); return; }
-    showStep(2);
   } catch (err) {
-    setErr('err1d2', err.message || 'Could not save. Please try again.');
-    setBtn('btn1d', false, 'Save & Continue →');
+    setErr('err3-screening', err.message || 'Could not submit. Please try again.');
+    setBtn('btn3-submit', false, 'Submit Application →');
     busy = false;
   }
 }
 
-function goStep4() {
-  setErr('err3', '');
-  showStep(4);
+function row(label, val) {
+  return '<div class="success-detail-row"><span>' + label + '</span><span>' + val + '</span></div>';
 }
 
+// ── PHASE 2: Insurance ────────────────────────────────────────
+function renderInsuranceStep(cfg) {
+  var ri = cfg.renters_insurance || 'optional';
+  var rg = cfg.rent_guarantee    || 'not_offered';
+
+  var riCard  = document.getElementById('ri-card');
+  var riBadge = document.getElementById('ri-badge');
+  var riConf  = document.getElementById('ri-confirm');
+  var rgCard  = document.getElementById('rg-card');
+  var rgBadge = document.getElementById('rg-badge');
+  var rgConf  = document.getElementById('rg-confirm');
+
+  var badgeClass = {'required':'badge-required','optional':'badge-optional','waived':'badge-waived','not_offered':'badge-na'};
+  var badgeLabel = {'required':'REQUIRED','optional':'OPTIONAL','waived':'WAIVED','not_offered':'NOT OFFERED'};
+  var cardClass  = {'required':'required','optional':'optional','waived':'waived','not_offered':'not-offered'};
+
+  riCard.className  = 'insurance-card ' + (cardClass[ri]  || '');
+  riBadge.className = 'ic-badge ' + (badgeClass[ri]  || '');
+  riBadge.textContent = badgeLabel[ri] || ri.toUpperCase();
+
+  if (ri === 'waived') {
+    riConf.innerHTML = '<p style="font-size:13px;color:#059669;margin-top:10px">✓ Waived for this unit — no renters insurance required.</p>';
+  } else {
+    riConf.innerHTML = '<label class="check-row" style="margin-top:12px">' +
+      '<input type="checkbox" id="ri-confirm-chk"/>  ' +
+      (ri === 'required'
+        ? 'I confirm I have or will obtain renters insurance before move-in.'
+        : 'I understand renters insurance is available and recommended.') +
+      '</label>';
+  }
+
+  if (rg === 'not_offered') {
+    rgCard.style.display = 'none';
+  } else {
+    rgCard.style.display = '';
+    rgCard.className  = 'insurance-card ' + (cardClass[rg] || '');
+    rgBadge.className = 'ic-badge ' + (badgeClass[rg] || '');
+    rgBadge.textContent = badgeLabel[rg] || rg.toUpperCase();
+    rgConf.innerHTML = '<label class="check-row" style="margin-top:12px">' +
+      '<input type="checkbox" id="rg-confirm-chk"/> I understand the rent guarantee requirements for this unit.</label>';
+  }
+}
+
+async function saveInsurance() {
+  setErr('err4', '');
+  var cfg = (inviteInfo.insuranceConfig || {});
+  var ri  = cfg.renters_insurance || 'optional';
+  var rg  = cfg.rent_guarantee    || 'not_offered';
+
+  var riChk = document.getElementById('ri-confirm-chk');
+  if (ri === 'required' && riChk && !riChk.checked) {
+    setErr('err4', 'Please confirm your renters insurance to continue.'); return;
+  }
+
+  setBtn('btn4', true, '<span class="spinner"></span> Saving…');
+  try {
+    var res  = await fetch(API_BASE + '?action=save-insurance', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        phase2token:              phase2Token,
+        renters_insurance_status: ri === 'waived' ? 'waived' : (riChk && riChk.checked ? 'confirmed' : 'pending'),
+        rent_guarantee_status:    rg === 'not_offered' ? 'not_offered' : 'acknowledged',
+      }),
+    });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+    setBtn('btn4', false, 'Continue to Payment →');
+
+    // Render lease summary for step 6
+    renderLeaseSummary();
+    showStep('5');
+  } catch (err) {
+    setErr('err4', err.message || 'Could not save. Please try again.');
+    setBtn('btn4', false, 'Continue to Payment →');
+  }
+}
+
+// ── PHASE 2: Payment ──────────────────────────────────────────
 function selectPayMethod(method) {
   selectedPayMethod = method;
   ['bank','debit','credit'].forEach(function(m) {
@@ -769,376 +1320,134 @@ function selectPayMethod(method) {
   });
 }
 
-// ── Step 2: Stripe Identity Verification ─────────────────────
-
-async function startVerification() {
-  if (busy) return;
-  setErr('err2', '');
-  busy = true;
-  setBtn('btn2', true, '<span class="spinner"></span> Preparing verification…');
-
-  try {
-    var name  = document.getElementById('name').value.trim();
-    var email = document.getElementById('email').value.trim();
-
-    var res  = await fetch(API_BASE + '?action=create-verification-session', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: token, name: name, email: email }),
-    });
-    var json = await res.json();
-
-    if (json.noVerification) {
-      showStep(3);
-      busy = false;
-      return;
-    }
-    if (json.error) throw new Error(json.error);
-    if (!stripe) throw new Error('Payment system not initialized. Please refresh the page.');
-
-    // Reset button while modal is open
-    setBtn('btn2', false, 'Verify My Identity →');
-    busy = false;
-
-    // Open Stripe Identity modal
-    var result = await stripe.verifyIdentity(json.clientSecret);
-
-    if (result.error) {
-      if (result.error.code === 'identity_verification_session_canceled') {
-        setErr('err2', 'Verification cancelled. Please complete ID verification to continue.');
-      } else {
-        setErr('err2', result.error.message || 'Verification failed. Please try again.');
-      }
-      return;
-    }
-
-    // Documents submitted — proceed to lease dates
-    showStep(3);
-  } catch (err) {
-    setErr('err2', err.message || 'Could not start verification. Please try again.');
-    setBtn('btn2', false, 'Verify My Identity →');
-    busy = false;
-  }
-}
-
-// ── Load invite (entry point) ────────────────────────────────
-
-async function loadInvite() {
-  var params = new URLSearchParams(window.location.search);
-
-  // ── Returning from DocuSign signing ──
-  var dsEvent = params.get('event');
-  if (dsEvent && params.get('token')) {
-    token = params.get('token');
-    if (dsEvent === 'signing_complete') {
-      document.getElementById('loading').innerHTML = '<span class="spinner"></span> Saving your signed lease…';
-      try {
-        await callSigningComplete();
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('main').style.display    = 'block';
-        document.getElementById('step-bar').style.display = 'none';
-        showSuccess(true, true);
-      } catch (e) {
-        showError('Could not save your signed lease: ' + e.message + '\nPlease contact your landlord.');
-      }
-      return;
-    }
-    if (dsEvent === 'cancel' || dsEvent === 'decline') {
-      // Reload form at step 5 so they can try again
-      await loadFormAndShowStep(5, 'You cancelled signing. Please try again when ready.');
-      return;
-    }
-    showError('Signing session ended. Please use your original invite link to try again.');
-    return;
-  }
-
-  // ── Returning from Stripe bank redirect ──
-  var setupIntent = params.get('setup_intent');
-  if (setupIntent && token) {
-    document.getElementById('loading').innerHTML = '<span class="spinner"></span> Completing your setup…';
-    try {
-      await loadFormData();                          // render hero
-      var payRes  = await fetch(API_BASE + '?action=confirm-payment', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token, setup_intent_id: setupIntent }),
-      });
-      var payJson = await payRes.json();
-      if (payJson.error) throw new Error(payJson.error);
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('main').style.display    = 'block';
-      if (payJson.hasDocuSign) {
-        buildLeaseSummary();
-        showStep(5);
-      } else {
-        showSuccess(true, false);
-      }
-    } catch (e) {
-      showError('Could not complete payment setup: ' + e.message);
-    }
-    return;
-  }
-
-  // ── Normal first load ──
-  if (!token) { showError('No invite token was provided in this link.'); return; }
-  try {
-    var json = await loadFormData();
-    showFormUI(json);
-    showStep('1a');
-  } catch (e) {
-    showError('Unable to load this invite. Please check your connection and try again.');
-  }
-}
-
-async function loadFormData() {
-  var res  = await fetch(API_BASE + '?action=info&token=' + encodeURIComponent(token));
-  var json = await res.json();
-  if (json.error) throw new Error(json.error);
-  inviteInfo = json;
-  return json;
-}
-
-async function loadFormAndShowStep(stepN, errMsg) {
-  try {
-    var json = await loadFormData();
-    showFormUI(json);
-    if (errMsg && stepN === 5) {
-      buildLeaseSummary();
-      setErr('err5', errMsg);
-    }
-    showStep(stepN);
-  } catch (e) {
-    showError(e.message);
-  }
-}
-
-function showFormUI(info) {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display    = 'block';
-
-  var loc = info.buildingName
-    ? info.buildingName + ' · Unit ' + info.unitNumber
-    : 'Unit ' + info.unitNumber;
-  document.getElementById('hero-loc').textContent  = loc;
-  document.getElementById('rent-chip').textContent = '$' + Number(info.rent).toLocaleString('en-US') + '/mo';
-
-  if (info.isRenewal) {
-    document.getElementById('hero-eyebrow').textContent = 'Lease Renewal';
-    document.getElementById('hero-title').textContent   = info.landlordName
-      ? 'Renewal from ' + info.landlordName
-      : 'Lease Renewal';
-  } else if (info.landlordName) {
-    document.getElementById('hero-title').textContent = 'Hi from ' + info.landlordName + '!';
-  }
-
-  // Pre-fill form fields for renewals
-  if (info.isRenewal && info.prefill) {
-    var p = info.prefill;
-    if (p.name)       document.getElementById('name').value        = p.name;
-    if (p.email)      document.getElementById('email').value       = p.email;
-    if (p.phone)      document.getElementById('phone').value       = p.phone;
-    if (p.leaseStart) document.getElementById('lease-start').value = p.leaseStart;
-    if (p.leaseEnd)   document.getElementById('lease-end').value   = p.leaseEnd;
-  }
-
-  if (info.stripePublishableKey) stripe = Stripe(info.stripePublishableKey);
-}
-
-// ── Lease summary card (step 5) ───────────────────────────────
-
-function buildLeaseSummary() {
-  var name       = document.getElementById('name').value.trim();
-  var leaseStart = document.getElementById('lease-start').value;
-  var leaseEnd   = document.getElementById('lease-end').value;
-
-  var rows = [
-    ['Property', (inviteInfo.buildingName || '') + (inviteInfo.buildingName ? ' · Unit ' + inviteInfo.unitNumber : 'Unit ' + inviteInfo.unitNumber)],
-    ['Tenant',   name || '—'],
-    ['Rent',     '$' + Number(inviteInfo.rent).toLocaleString('en-US') + ' / month'],
-  ];
-  if (leaseStart) rows.push(['Lease Start', formatDate(leaseStart)]);
-  if (leaseEnd)   rows.push(['Lease End',   formatDate(leaseEnd)]);
-  else            rows.push(['Term',        'Month-to-month']);
-
-  document.getElementById('lease-summary').innerHTML = rows.map(function(r) {
-    return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
-  }).join('');
-}
-
-// ── Step 4: Init Stripe payment ───────────────────────────────
-
 async function initPayment() {
   if (busy) return;
-  setErr('err4', '');
-
-  var name       = document.getElementById('name').value.trim();
-  var email      = document.getElementById('email').value.trim();
-  var phone      = document.getElementById('phone').value.trim();
-  var leaseStart = document.getElementById('lease-start').value;
-  var leaseEnd   = document.getElementById('lease-end').value;
-
+  setErr('err5', '');
   busy = true;
-  setBtn('btn4-init', true, '<span class="spinner"></span> Setting up…');
+  setBtn('btn5-init', true, '<span class="spinner"></span> Loading payment…');
+
+  var wrap = document.getElementById('payment-element-wrap');
+  wrap.style.display = '';
+  wrap.className = 'loading';
+  wrap.innerHTML = '<div class="spinner"></div> Loading secure payment form…';
 
   try {
-    var res  = await fetch(API_BASE + '?action=submit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: token, name: name, email: email, phone: phone, lease_start: leaseStart, lease_end: leaseEnd }),
+    var res  = await fetch(API_BASE + '?action=create-payment-setup', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token: inviteInfo.phase1Token || token || '', paymentMethod: selectedPayMethod }),
     });
     var json = await res.json();
     if (json.error) throw new Error(json.error);
+    if (!stripe) throw new Error('Stripe not initialized.');
 
-    // No Stripe configured
-    if (json.success && !json.clientSecret) {
-      if (json.hasDocuSign) {
-        buildLeaseSummary();
-        showStep(5);
-      } else {
-        showSuccess(false, false);
-      }
-      return;
-    }
-
-    // Init Stripe Elements
-    if (!stripe && json.publishableKey) stripe = Stripe(json.publishableKey);
-    if (!stripe) throw new Error('Payment system not configured. Contact your landlord.');
-
-    var wrap = document.getElementById('payment-element-wrap');
-    wrap.style.display = 'flex';
-    wrap.className     = 'loading';
-    wrap.innerHTML     = '<div class="spinner"></div> Loading secure payment form…';
-
-    elements = stripe.elements({
-      clientSecret: json.clientSecret,
-      appearance:   { theme: 'stripe', variables: { colorPrimary: '#4361EE', borderRadius: '14px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' } },
-    });
-
-    var paymentElement = elements.create('payment', {
-      layout: 'tabs',
-      defaultValues: { billingDetails: { name: name, email: email, phone: phone } },
-    });
-
-    wrap.className = '';
+    elements = stripe.elements({ clientSecret: json.clientSecret, appearance: {theme:'stripe'} });
+    var paymentEl = elements.create('payment');
     wrap.innerHTML = '';
-    paymentElement.mount('#payment-element');
+    wrap.className = '';
+    paymentEl.mount('#payment-element-wrap');
 
-    document.getElementById('btn4-init').style.display    = 'none';
-    document.getElementById('btn4-confirm').style.display = '';
+    document.getElementById('btn5-init').style.display    = 'none';
+    document.getElementById('btn5-confirm').style.display = '';
+    busy = false;
   } catch (err) {
-    setErr('err4', err.message || 'Could not initialize payment. Please try again.');
-    setBtn('btn4-init', false, 'Continue to Payment →');
-  } finally {
+    setErr('err5', err.message || 'Could not load payment form.');
+    wrap.style.display = 'none';
+    setBtn('btn5-init', false, 'Continue to Payment →');
     busy = false;
   }
 }
 
 async function confirmPayment() {
-  if (busy || !stripe || !elements) return;
+  if (busy || !elements) return;
+  setErr('err5', '');
   busy = true;
-  setBtn('btn4-confirm', true, '<span class="spinner"></span> Authorizing…');
-  setErr('err4', '');
-
-  var returnUrl = window.location.origin + window.location.pathname +
-    '?token=' + encodeURIComponent(token) +
-    '&setup_intent={setup_intent}&setup_intent_client_secret={setup_intent_client_secret}';
+  setBtn('btn5-confirm', true, '<span class="spinner"></span> Authorizing…');
 
   try {
     var result = await stripe.confirmSetup({
-      elements:      elements,
-      redirect:      'if_required',
-      confirmParams: { return_url: returnUrl },
+      elements,
+      redirect: 'if_required',
     });
-
     if (result.error) throw new Error(result.error.message);
-
-    if (result.setupIntent && result.setupIntent.status === 'succeeded') {
-      await callConfirmPayment(result.setupIntent.id);
-    }
+    setBtn('btn5-confirm', false, 'Authorize Auto-Pay 🔒');
+    busy = false;
+    showStep('6');
   } catch (err) {
-    setErr('err4', err.message || 'Could not set up payment. Please try again.');
-    setBtn('btn4-confirm', false, 'Authorize Auto-Pay 🔒');
+    setErr('err5', err.message || 'Payment authorization failed.');
+    setBtn('btn5-confirm', false, 'Authorize Auto-Pay 🔒');
     busy = false;
   }
 }
 
-async function callConfirmPayment(setupIntentId) {
-  var res  = await fetch(API_BASE + '?action=confirm-payment', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: token, setup_intent_id: setupIntentId }),
+// ── PHASE 2: Lease Signing ────────────────────────────────────
+function renderLeaseSummary() {
+  var rows = [
+    ['Tenant', inviteInfo.tenantName || '—'],
+    ['Unit',   inviteInfo.unitNumber ? 'Unit ' + inviteInfo.unitNumber : '—'],
+    ['Building', inviteInfo.buildingName || '—'],
+    ['Monthly Rent', inviteInfo.rent ? '$' + Number(inviteInfo.rent).toLocaleString() + '/mo' : '—'],
+  ];
+  var html = '';
+  rows.forEach(function(r) {
+    html += '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
   });
-  var json = await res.json();
-  if (json.error) throw new Error(json.error);
-
-  if (json.hasDocuSign) {
-    buildLeaseSummary();
-    showStep(5);
-  } else {
-    showSuccess(true, false);
-  }
+  var el = document.getElementById('lease-summary');
+  if (el) el.innerHTML = html;
 }
-
-// ── Step 5: DocuSign signing ──────────────────────────────────
 
 async function startSigning() {
   if (busy) return;
+  setErr('err6', '');
   busy = true;
-  setBtn('btn5', true, '<span class="spinner"></span> Preparing lease document…');
-  setErr('err5', '');
+  setBtn('btn6', true, '<span class="spinner"></span> Preparing lease…');
 
   try {
-    var res  = await fetch(API_BASE + '?action=get-signing-url', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: token }),
+    var t = inviteInfo.phase1Token || token || '';
+    var returnUrl = window.location.origin + window.location.pathname +
+      (phase2Token ? '?phase2token=' + phase2Token : '?token=' + t) + '&signed=1';
+
+    var res  = await fetch(API_BASE + '?action=create-docusign-envelope', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token: t, returnUrl }),
     });
     var json = await res.json();
-
-    if (json.noDocuSign) {
-      // DocuSign not configured — complete without signing
-      await callSigningComplete();
-      showSuccess(true, false);
-      return;
-    }
-
     if (json.error) throw new Error(json.error);
-
-    // Redirect to DocuSign — page returns with ?event=signing_complete
+    if (json.noDocuSign) {
+      // Mark complete without DocuSign
+      await fetch(API_BASE + '?action=signing-complete', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ token: t }),
+      });
+      showStep('p2-complete');
+      busy = false; return;
+    }
     window.location.href = json.signingUrl;
   } catch (err) {
-    setErr('err5', err.message || 'Could not prepare the document. Please try again.');
-    setBtn('btn5', false, '<span class="ds-logo">✍️</span> Sign Lease with DocuSign');
+    setErr('err6', err.message || 'Could not prepare lease. Please try again.');
+    setBtn('btn6', false, '<span>✍️</span> Sign Lease with DocuSign');
     busy = false;
   }
 }
 
-async function callSigningComplete() {
-  var res  = await fetch(API_BASE + '?action=signing-complete', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: token }),
-  });
-  var json = await res.json();
-  if (json.error) throw new Error(json.error);
-}
-
-// ── Success screen ────────────────────────────────────────────
-
-function showSuccess(hasPayment, hasSigning) {
-  for (var i = 1; i <= 5; i++) {
-    document.getElementById('step' + i).style.display = 'none';
+// Handle return from DocuSign
+(function() {
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('signed') === '1') {
+    var t = phase2Token ? (inviteInfo.phase1Token || '') : (token || '');
+    fetch(API_BASE + '?action=signing-complete', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token: t }),
+    }).then(function() {
+      if (document.getElementById('main')) showStep('p2-complete');
+    }).catch(function() {});
   }
-  document.getElementById('step-bar').style.display = 'none';
-  updateSteps(6);
+})();
 
-  var lines = [];
-  if (hasSigning)  lines.push('Your lease has been signed and saved to your files.');
-  if (hasPayment)  lines.push('Your rent will be charged automatically on the 1st of each month.');
-  if (!hasPayment && !hasSigning) lines.push('Your information has been saved.');
-  lines.push('');
-  lines.push('Your landlord has been notified. You may close this page.');
-
-  document.getElementById('success-body').innerHTML = lines.join('<br/>');
-  document.getElementById('success-view').classList.add('on');
-  window.scrollTo(0, 0);
-}
-
-loadInvite();
+// ── Init ──────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  if (isPhase2) loadPhase2();
+  else          loadPhase1();
+});
 </script>
 </body>
 </html>
