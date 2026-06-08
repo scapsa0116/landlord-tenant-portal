@@ -54,9 +54,9 @@
     /* Section headers */
     .section-hdr{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:2px solid #EEF1FD}
 
-    /* DOB */
+    /* DOB dropdowns (shared across all date-of-birth fields) */
     .dob-row{display:flex;gap:8px}
-    .dob-row select{flex:1;min-width:0}
+    .dob-row select{flex:1;min-width:0;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 
     /* Checkboxes */
     .check-group{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
@@ -288,32 +288,6 @@
         <div class="field">
           <label for="addr-zip">ZIP Code</label>
           <input id="addr-zip" type="text" placeholder="60601" inputmode="numeric" maxlength="10" autocomplete="postal-code"/>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Previous Address <span class="field-optional" style="font-size:11px">optional</span></div>
-        <div class="field">
-          <label for="prev-addr-street">Street</label>
-          <input id="prev-addr-street" type="text" placeholder="456 Oak Ave"/>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="prev-addr-city">City</label>
-            <input id="prev-addr-city" type="text" placeholder="Springfield"/>
-          </div>
-          <div class="field" style="max-width:80px">
-            <label for="prev-addr-state">State</label>
-            <select id="prev-addr-state"><option value="">ST</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="prev-addr-zip">ZIP</label>
-          <input id="prev-addr-zip" type="text" placeholder="62701" inputmode="numeric" maxlength="10"/>
-        </div>
-        <div class="field">
-          <label for="prev-addr-duration">How long did you live there?</label>
-          <input id="prev-addr-duration" type="text" placeholder="2 years"/>
         </div>
       </div>
 
@@ -814,11 +788,57 @@ function showStep(n) {
   }
 })();
 
+// ── Occupant DOB helpers ──────────────────────────────────────
+function buildDobDays(dayEl, month, year) {
+  var selected = dayEl.value;
+  var max = month ? new Date(year || new Date().getFullYear(), parseInt(month), 0).getDate() : 31;
+  dayEl.innerHTML = '<option value="">Day</option>';
+  for (var d = 1; d <= max; d++) {
+    var o = document.createElement('option');
+    o.value = o.textContent = String(d).padStart(2, '0');
+    if (o.value === selected) o.selected = true;
+    dayEl.appendChild(o);
+  }
+}
+
+function populateOccDobYears(yearEl) {
+  if (yearEl.options.length > 1) return;
+  var yr = new Date().getFullYear();
+  for (var y = yr - 18; y >= yr - 90; y--) {
+    var o = document.createElement('option');
+    o.value = o.textContent = String(y);
+    yearEl.appendChild(o);
+  }
+}
+
+function updateOccDobDays(idx) {
+  var mEl = document.getElementById('occ' + idx + '-dob-m');
+  var dEl = document.getElementById('occ' + idx + '-dob-d');
+  var yEl = document.getElementById('occ' + idx + '-dob-y');
+  if (!mEl || !dEl) return;
+  buildDobDays(dEl, mEl.value, yEl?.value ? parseInt(yEl.value) : null);
+}
+
+function initOccDob(idx) {
+  var yEl = document.getElementById('occ' + idx + '-dob-y');
+  var dEl = document.getElementById('occ' + idx + '-dob-d');
+  if (yEl) populateOccDobYears(yEl);
+  if (dEl) buildDobDays(dEl, null, null);
+}
+
+function collectOccDob(idx) {
+  var m = document.getElementById('occ' + idx + '-dob-m')?.value || '';
+  var d = document.getElementById('occ' + idx + '-dob-d')?.value || '';
+  var y = document.getElementById('occ' + idx + '-dob-y')?.value || '';
+  return (m && d && y) ? y + '-' + m + '-' + d : '';
+}
+
 // ── Occupants ─────────────────────────────────────────────────
 function updateOccupants() {
   var n   = parseInt(document.getElementById('num-occupants').value) || 0;
   var box = document.getElementById('occupants-container');
   box.innerHTML = '';
+  if (n === 0) return;
   for (var i = 1; i <= n; i++) {
     var idx = i;
     box.innerHTML +=
@@ -829,13 +849,29 @@ function updateOccupants() {
           '<div class="field"><label>Last Name</label><input type="text" id="occ' + idx + '-last" placeholder="Last"/></div>' +
         '</div>' +
         '<div class="field"><label>Relationship</label><input type="text" id="occ' + idx + '-relation" placeholder="Spouse, Child, Roommate…"/></div>' +
-        '<div class="field"><label>Date of Birth</label><input type="date" id="occ' + idx + '-dob"/></div>' +
+        '<div class="field"><label>Date of Birth</label>' +
+          '<div class="dob-row" id="occ' + idx + '-dob-row">' +
+            '<select id="occ' + idx + '-dob-m" onchange="updateOccDobDays(' + idx + ')">' +
+              '<option value="">Month</option>' +
+              '<option value="01">January</option><option value="02">February</option>' +
+              '<option value="03">March</option><option value="04">April</option>' +
+              '<option value="05">May</option><option value="06">June</option>' +
+              '<option value="07">July</option><option value="08">August</option>' +
+              '<option value="09">September</option><option value="10">October</option>' +
+              '<option value="11">November</option><option value="12">December</option>' +
+            '</select>' +
+            '<select id="occ' + idx + '-dob-d"><option value="">Day</option></select>' +
+            '<select id="occ' + idx + '-dob-y"><option value="">Year</option></select>' +
+          '</div>' +
+        '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label>Email</label><input type="email" id="occ' + idx + '-email" placeholder="email@example.com"/></div>' +
           '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
         '</div>' +
       '</div>';
   }
+  // Populate year + day dropdowns now that DOM is ready
+  for (var j = 1; j <= n; j++) { initOccDob(j); }
 }
 
 function collectOccupants() {
@@ -846,7 +882,7 @@ function collectOccupants() {
       first_name:   (document.getElementById('occ' + i + '-first')?.value    || '').trim(),
       last_name:    (document.getElementById('occ' + i + '-last')?.value     || '').trim(),
       relationship: (document.getElementById('occ' + i + '-relation')?.value || '').trim(),
-      dob:          (document.getElementById('occ' + i + '-dob')?.value      || ''),
+      dob:          collectOccDob(i),
       email:        (document.getElementById('occ' + i + '-email')?.value    || '').trim(),
       phone:        (document.getElementById('occ' + i + '-phone')?.value    || '').trim(),
     });
@@ -1068,13 +1104,6 @@ async function saveStep1() {
         address_city:        v('addr-city'),
         address_state:       document.getElementById('addr-state').value,
         address_zip:         v('addr-zip'),
-        previous_address: {
-          street:    v('prev-addr-street'),
-          city:      v('prev-addr-city'),
-          state:     document.getElementById('prev-addr-state').value,
-          zip:       v('prev-addr-zip'),
-          duration:  v('prev-addr-duration'),
-        },
         emergency_contact: {
           name:         v('ec-name'),
           phone:        v('ec-phone'),
