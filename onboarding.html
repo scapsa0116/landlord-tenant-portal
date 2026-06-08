@@ -1398,6 +1398,18 @@ async function confirmPayment() {
       redirect: 'if_required',
     });
     if (result.error) throw new Error(result.error.message);
+
+    // Finalize subscription on the backend
+    var siId = result.setupIntent && result.setupIntent.id;
+    if (siId) {
+      var res2 = await fetch(API_BASE + '?action=confirm-payment', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ token: inviteInfo.phase1Token || token || '', setup_intent_id: siId }),
+      });
+      var json2 = await res2.json();
+      if (json2.error) throw new Error(json2.error);
+    }
+
     setBtn('btn5-confirm', false, 'Authorize Auto-Pay 🔒');
     busy = false;
     showStep('6');
