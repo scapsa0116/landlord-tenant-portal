@@ -1447,7 +1447,7 @@ async function startSigning() {
     var returnUrl = window.location.origin + window.location.pathname +
       (phase2Token ? '?phase2token=' + phase2Token : '?token=' + t) + '&signed=1';
 
-    var res  = await fetch(API_BASE + '?action=create-docusign-envelope', {
+    var res  = await fetch(API_BASE + '?action=get-signing-url', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ token: t, returnUrl }),
     });
