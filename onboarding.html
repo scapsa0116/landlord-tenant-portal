@@ -430,26 +430,27 @@
         <div class="section-hdr">Supervisor Contact <span class="field-optional">optional</span></div>
         <div class="field-row">
           <div class="field">
-            <label for="supervisor-name">Name</label>
-            <input id="supervisor-name" type="text" placeholder="Manager name"/>
+            <label for="supervisor-first">First Name</label>
+            <input id="supervisor-first" type="text" placeholder="Manager first name"/>
           </div>
           <div class="field">
-            <label for="supervisor-phone">Phone</label>
-            <input id="supervisor-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
+            <label for="supervisor-last">Last Name</label>
+            <input id="supervisor-last" type="text" placeholder="Manager last name"/>
           </div>
         </div>
 
         <div class="section-hdr">Previous Landlord <span class="field-optional">optional</span></div>
         <div class="field-row">
           <div class="field">
-            <label for="prev-ll-name">Name</label>
-            <input id="prev-ll-name" type="text" placeholder="John Smith"/>
+            <label for="supervisor-phone">Supervisor Phone</label>
+            <input id="supervisor-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
           </div>
           <div class="field">
-            <label for="prev-ll-phone">Phone</label>
-            <input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
+            <label for="prev-ll-first">First Name</label>
+            <input id="prev-ll-first" type="text" placeholder="John"/>
           </div>
         </div>
+        <div class="field-row"><div class="field"><label for="prev-ll-last">Last Name</label><input id="prev-ll-last" type="text" placeholder="Smith"/></div><div class="field"><label for="prev-ll-phone">Phone</label><input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/></div></div>
         <div id="err2a" class="err-msg"></div>
       </div>
       <button class="btn btn-primary" id="btn2a" onclick="goStep2b()">Next: Documents →</button>
@@ -1179,9 +1180,13 @@ async function saveStep2() {
         position:            v('position'),
         monthly_income:      Number(document.getElementById('monthly-income').value) || null,
         employment_length:   v('emp-length'),
-        supervisor_name:     v('supervisor-name'),
+        supervisor_first_name: v('supervisor-first'),
+        supervisor_last_name:  v('supervisor-last'),
+        supervisor_name:     (v('supervisor-first') + ' ' + v('supervisor-last')).trim(),
         supervisor_phone:    v('supervisor-phone'),
-        prev_landlord_name:  v('prev-ll-name'),
+        prev_landlord_first_name: v('prev-ll-first'),
+        prev_landlord_last_name:  v('prev-ll-last'),
+        prev_landlord_name:  (v('prev-ll-first') + ' ' + v('prev-ll-last')).trim(),
         prev_landlord_phone: v('prev-ll-phone'),
         additional_income:   collectAdditionalIncome(),
         documents_attached:  Object.keys(attachedDocs),
