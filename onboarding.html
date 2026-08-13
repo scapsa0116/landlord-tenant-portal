@@ -261,6 +261,11 @@
           <input id="drivers-license" type="text" placeholder="D1234567"/>
           <div class="field-hint">Used only for identity verification purposes.</div>
         </div>
+        <div class="field"><label for="drivers-license-state">Driver's License State</label><input id="drivers-license-state" type="text" placeholder="IL" maxlength="30"/></div>
+        <div class="card-title" style="margin-top:20px">Vehicle <span class="field-optional">(optional)</span></div>
+        <div class="field-row"><div class="field"><label for="vehicle-year">Year</label><input id="vehicle-year" inputmode="numeric" placeholder="2022"/></div><div class="field"><label for="vehicle-make">Make</label><input id="vehicle-make" placeholder="Toyota"/></div></div>
+        <div class="field-row"><div class="field"><label for="vehicle-model">Model</label><input id="vehicle-model" placeholder="Camry"/></div><div class="field"><label for="vehicle-color">Color</label><input id="vehicle-color" placeholder="Blue"/></div></div>
+        <div class="field-row"><div class="field"><label for="vehicle-plate">License Plate</label><input id="vehicle-plate" placeholder="ABC 123"/></div><div class="field"><label for="vehicle-state">Plate State</label><input id="vehicle-state" placeholder="IL"/></div></div>
         <div id="err1a" class="err-msg"></div>
       </div>
       <button class="btn btn-primary" id="btn1a" onclick="goStep1b()">Next: Address →</button>
@@ -293,9 +298,9 @@
 
       <div class="card">
         <div class="card-title">Emergency Contact</div>
-        <div class="field">
-          <label for="ec-name">Full Name</label>
-          <input id="ec-name" type="text" placeholder="John Smith"/>
+        <div class="field-row">
+          <div class="field"><label for="ec-first">First Name</label><input id="ec-first" type="text" placeholder="John"/></div>
+          <div class="field"><label for="ec-last">Last Name</label><input id="ec-last" type="text" placeholder="Smith"/></div>
         </div>
         <div class="field-row">
           <div class="field">
@@ -868,6 +873,12 @@ function updateOccupants() {
           '<div class="field"><label>Email</label><input type="email" id="occ' + idx + '-email" placeholder="email@example.com"/></div>' +
           '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
         '</div>' +
+        '<div class="field-row"><div class="field"><label>Government ID Type</label><select id="occ' + idx + '-id-type"><option value="">Select</option><option>Driver License</option><option>State ID</option><option>Passport</option><option>Other</option></select></div><div class="field"><label>ID / License Number</label><input type="text" id="occ' + idx + '-id-number" placeholder="ID number"/></div></div>' +
+        '<div class="field"><label>ID / License State or Country</label><input type="text" id="occ' + idx + '-id-state" placeholder="IL or United States"/></div>' +
+        '<div class="occupant-label" style="margin-top:16px">Vehicle (optional)</div>' +
+        '<div class="field-row"><div class="field"><label>Year</label><input type="text" inputmode="numeric" id="occ' + idx + '-vehicle-year" placeholder="2022"/></div><div class="field"><label>Make</label><input type="text" id="occ' + idx + '-vehicle-make" placeholder="Toyota"/></div></div>' +
+        '<div class="field-row"><div class="field"><label>Model</label><input type="text" id="occ' + idx + '-vehicle-model" placeholder="Camry"/></div><div class="field"><label>Color</label><input type="text" id="occ' + idx + '-vehicle-color" placeholder="Blue"/></div></div>' +
+        '<div class="field-row"><div class="field"><label>License Plate</label><input type="text" id="occ' + idx + '-vehicle-plate" placeholder="ABC 123"/></div><div class="field"><label>Plate State</label><input type="text" id="occ' + idx + '-vehicle-state" placeholder="IL"/></div></div>' +
       '</div>';
   }
   // Populate year + day dropdowns now that DOM is ready
@@ -885,6 +896,8 @@ function collectOccupants() {
       dob:          collectOccDob(i),
       email:        (document.getElementById('occ' + i + '-email')?.value    || '').trim(),
       phone:        (document.getElementById('occ' + i + '-phone')?.value    || '').trim(),
+      identification: { type:(document.getElementById('occ' + i + '-id-type')?.value || '').trim(), number:(document.getElementById('occ' + i + '-id-number')?.value || '').trim(), state:(document.getElementById('occ' + i + '-id-state')?.value || '').trim() },
+      vehicles: (document.getElementById('occ' + i + '-vehicle-make')?.value || document.getElementById('occ' + i + '-vehicle-plate')?.value) ? [{ year:(document.getElementById('occ' + i + '-vehicle-year')?.value || '').trim(), make:(document.getElementById('occ' + i + '-vehicle-make')?.value || '').trim(), model:(document.getElementById('occ' + i + '-vehicle-model')?.value || '').trim(), color:(document.getElementById('occ' + i + '-vehicle-color')?.value || '').trim(), plate:(document.getElementById('occ' + i + '-vehicle-plate')?.value || '').trim(), state:(document.getElementById('occ' + i + '-vehicle-state')?.value || '').trim() }] : [],
     });
   }
   return list;
@@ -1066,13 +1079,19 @@ function goStep1c() {
   if (!v('addr-city'))   { setErr('err1b', 'Please enter your city.'); return; }
   if (!v('addr-state'))  { setErr('err1b', 'Please select your state.'); return; }
   if (!v('addr-zip'))    { setErr('err1b', 'Please enter your ZIP code.'); return; }
-  if (!v('ec-name'))     { setErr('err1b', 'Please enter an emergency contact name.'); return; }
+  if (!v('ec-first') || !v('ec-last')) { setErr('err1b', 'Please enter the emergency contact first and last name.'); return; }
   if (!v('ec-phone'))    { setErr('err1b', 'Please enter an emergency contact phone.'); return; }
   showStep('1c');
 }
 
 function goStep1d() {
   setErr('err1c', '');
+  var occupants = collectOccupants();
+  for (var i = 0; i < occupants.length; i++) {
+    var o = occupants[i];
+    if (!o.first_name || !o.last_name || !o.relationship || !o.dob) { setErr('err1c', 'Enter first name, last name, relationship, and date of birth for every occupant.'); return; }
+    if (!o.email && !o.phone) { setErr('err1c', 'Enter an email or phone number for every occupant.'); return; }
+  }
   showStep('1d');
 }
 
@@ -1100,12 +1119,16 @@ async function saveStep1() {
         email:               v('email'),
         phone:               v('phone'),
         drivers_license:     v('drivers-license'),
+        identification: { type:'Driver License', number:v('drivers-license'), state:v('drivers-license-state') },
+        vehicles: (v('vehicle-make') || v('vehicle-plate')) ? [{ year:v('vehicle-year'), make:v('vehicle-make'), model:v('vehicle-model'), color:v('vehicle-color'), plate:v('vehicle-plate'), state:v('vehicle-state') }] : [],
         address_street:      v('addr-street'),
         address_city:        v('addr-city'),
         address_state:       document.getElementById('addr-state').value,
         address_zip:         v('addr-zip'),
         emergency_contact: {
-          name:         v('ec-name'),
+          first_name:   v('ec-first'),
+          last_name:    v('ec-last'),
+          name:         (v('ec-first') + ' ' + v('ec-last')).trim(),
           phone:        v('ec-phone'),
           relationship: v('ec-relation'),
         },
