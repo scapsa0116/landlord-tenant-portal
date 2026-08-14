@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Tenant Application</title>
+  <title>Household Rental Application — Two-Stage Onboarding</title>
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -209,6 +209,11 @@
   </div>
 
   <div id="main" style="display:none">
+
+    <div id="stage-banner" style="background:#1A1D2E;color:#fff;border-radius:14px;padding:13px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div><div id="stage-banner-title" style="font-size:13px;font-weight:900;letter-spacing:.5px">STAGE 1 OF 2 — HOUSEHOLD APPLICATION</div><div id="stage-banner-subtitle" style="font-size:11px;opacity:.72;margin-top:3px">Household, income, documents and individual adult screening</div></div>
+      <div id="stage-banner-number" style="font-size:24px;font-weight:900">1/2</div>
+    </div>
 
     <!-- 3-step progress bar -->
     <div class="steps" id="step-bar">
@@ -1123,6 +1128,10 @@ async function loadPhase2() {
     var json = await res.json();
     if (json.error) { showError(json.error); return; }
     inviteInfo = json;
+
+    document.getElementById('stage-banner-title').textContent = 'STAGE 2 OF 2 — MOVE-IN SETUP';
+    document.getElementById('stage-banner-subtitle').textContent = 'Insurance, payment setup and required lease signatures';
+    document.getElementById('stage-banner-number').textContent = '2/2';
 
     // Update labels to Phase 2
     document.getElementById('hero-eyebrow').textContent = 'Lease Setup';
