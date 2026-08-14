@@ -196,6 +196,18 @@
     <div id="error-body" class="error-body"></div>
   </div>
 
+  <div id="adult-screening-view" style="display:none">
+    <div class="hero"><div class="hero-eyebrow">Household Application</div><div class="hero-title">Complete Your Screening</div><div class="hero-loc">Your consent is personal and cannot be completed by the primary applicant.</div></div>
+    <div class="card">
+      <div class="card-title">Adult Screening Consent</div>
+      <p id="adult-screening-name" style="font-size:17px;font-weight:800;color:#1A1D2E;margin-bottom:12px"></p>
+      <p style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:18px">Only your completion status is shared with the primary applicant. Your private consumer report is not shown to other household members. Enter sensitive identity information only on the screening provider's secure page; this application does not store your full Social Security number.</p>
+      <label class="check-row"><input type="checkbox" id="adult-consent"/> I authorize the screening provider to process my individual rental screening in accordance with its disclosure.</label>
+      <div id="adult-screening-error" class="err-msg"></div>
+      <button class="btn btn-primary" id="adult-screening-button" onclick="completeAdultConsent()" style="margin-top:20px">Save Consent &amp; Continue →</button>
+    </div>
+  </div>
+
   <div id="main" style="display:none">
 
     <!-- 3-step progress bar -->
@@ -240,6 +252,7 @@
             <input id="last-name" type="text" placeholder="Smith" autocomplete="family-name"/>
           </div>
         </div>
+        <div class="field"><label for="middle-name">Middle Name <span class="field-optional">(optional)</span></label><input id="middle-name" type="text" placeholder="Middle" autocomplete="additional-name"/></div>
         <div class="field">
           <label>Date of Birth</label>
           <div class="dob-row">
@@ -321,7 +334,8 @@
     <!-- STEP 1c — Occupants + Pets -->
     <div id="step1c" style="display:none">
       <div class="card">
-        <div class="card-title">Additional Occupants</div>
+        <div class="card-title">Who will live in this home?</div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Add every adult and minor in the household. Each adult must use their own email and phone so they can provide screening consent directly. Minors are occupants only and are not screened.</p>
         <div class="field">
           <label for="num-occupants">Number of additional occupants</label>
           <select id="num-occupants" onchange="updateOccupants()">
@@ -693,6 +707,7 @@ var API_BASE        = 'https://iykkkfcwuparqtomyaow.supabase.co/functions/v1/ten
 var PORTAL_URL      = 'https://scapsa0116.github.io/landlord-tenant-portal/onboarding.html';
 var params          = new URLSearchParams(window.location.search);
 var isPhase2        = !!params.get('phase2token');
+var screeningToken  = params.get('screeningToken') || '';
 var token           = isPhase2 ? null  : (params.get('token') || '');
 var phase2Token     = isPhase2 ? (params.get('phase2token') || '') : null;
 var busy            = false;
@@ -712,6 +727,38 @@ function showError(msg) {
   document.getElementById('main').style.display       = 'none';
   document.getElementById('error-body').textContent   = msg;
   document.getElementById('error-view').style.display = 'block';
+}
+
+async function loadAdultScreening() {
+  try {
+    var res = await fetch(API_BASE + '?action=adult-screening-info&screeningToken=' + encodeURIComponent(screeningToken));
+    var json = await res.json();
+    if (json.error) { showError(json.error); return; }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('adult-screening-view').style.display = '';
+    document.getElementById('adult-screening-name').textContent = [json.member.first_name, json.member.middle_name, json.member.last_name].filter(Boolean).join(' ');
+    if (json.completed) {
+      document.getElementById('adult-consent').checked = true;
+      document.getElementById('adult-screening-button').textContent = 'Consent already saved';
+      document.getElementById('adult-screening-button').disabled = true;
+    }
+  } catch (_) { showError('Screening invitation could not be loaded.'); }
+}
+
+async function completeAdultConsent() {
+  setErr('adult-screening-error', '');
+  if (!chk('adult-consent')) { setErr('adult-screening-error', 'Review and confirm your individual consent to continue.'); return; }
+  setBtn('adult-screening-button', true, '<span class="spinner"></span> Saving…');
+  try {
+    var res = await fetch(API_BASE + '?action=complete-adult-screening', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ screeningToken:screeningToken, consent:true, provider:'smartmove' }) });
+    var json = await res.json();
+    if (json.error) throw new Error(json.error);
+    document.getElementById('adult-screening-button').textContent = 'Consent saved ✓';
+    window.open('https://www.mysmartmove.com', '_blank');
+  } catch (e) {
+    setErr('adult-screening-error', e.message || 'Screening consent could not be saved.');
+    setBtn('adult-screening-button', false, 'Save Consent & Continue →');
+  }
 }
 
 function setErr(id, msg) {
@@ -810,7 +857,7 @@ function buildDobDays(dayEl, month, year) {
 function populateOccDobYears(yearEl) {
   if (yearEl.options.length > 1) return;
   var yr = new Date().getFullYear();
-  for (var y = yr - 18; y >= yr - 90; y--) {
+  for (var y = yr; y >= yr - 100; y--) {
     var o = document.createElement('option');
     o.value = o.textContent = String(y);
     yearEl.appendChild(o);
@@ -839,6 +886,16 @@ function collectOccDob(idx) {
   return (m && d && y) ? y + '-' + m + '-' + d : '';
 }
 
+function occupantIsAdult(idx) {
+  var dob = collectOccDob(idx);
+  if (!dob) return true;
+  var born = new Date(dob + 'T12:00:00');
+  var today = new Date();
+  var age = today.getFullYear() - born.getFullYear();
+  if (today.getMonth() < born.getMonth() || (today.getMonth() === born.getMonth() && today.getDate() < born.getDate())) age--;
+  return age >= 18;
+}
+
 // ── Occupants ─────────────────────────────────────────────────
 function updateOccupants() {
   var n   = parseInt(document.getElementById('num-occupants').value) || 0;
@@ -854,7 +911,8 @@ function updateOccupants() {
           '<div class="field"><label>First Name</label><input type="text" id="occ' + idx + '-first" placeholder="First"/></div>' +
           '<div class="field"><label>Last Name</label><input type="text" id="occ' + idx + '-last" placeholder="Last"/></div>' +
         '</div>' +
-        '<div class="field"><label>Relationship</label><input type="text" id="occ' + idx + '-relation" placeholder="Spouse, Child, Roommate…"/></div>' +
+        '<div class="field"><label>Middle Name <span class="field-optional">(optional)</span></label><input type="text" id="occ' + idx + '-middle" placeholder="Middle"/></div>' +
+        '<div class="field"><label>Relationship to Primary Applicant</label><select id="occ' + idx + '-relation"><option value="">Select</option><option value="spouse_partner">Spouse / Partner</option><option value="child">Child</option><option value="parent">Parent</option><option value="sibling">Sibling</option><option value="roommate">Roommate</option><option value="other">Other</option></select></div>' +
         '<div class="field"><label>Date of Birth</label>' +
           '<div class="dob-row" id="occ' + idx + '-dob-row">' +
             '<select id="occ' + idx + '-dob-m" onchange="updateOccDobDays(' + idx + ')">' +
@@ -874,12 +932,24 @@ function updateOccupants() {
           '<div class="field"><label>Email</label><input type="email" id="occ' + idx + '-email" placeholder="email@example.com"/></div>' +
           '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
         '</div>' +
-        '<div class="field-row"><div class="field"><label>Government ID Type</label><select id="occ' + idx + '-id-type"><option value="">Select</option><option>Driver License</option><option>State ID</option><option>Passport</option><option>Other</option></select></div><div class="field"><label>ID / License Number</label><input type="text" id="occ' + idx + '-id-number" placeholder="ID number"/></div></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Government ID Type</label><select id="occ' + idx + '-id-type"><option value="">Select</option><option>Driver License</option><option>State ID</option><option>Passport</option><option>Other</option></select></div>' +
+          '<div class="field"><label>ID / License Number</label><input type="text" id="occ' + idx + '-id-number" placeholder="ID number"/></div>' +
+        '</div>' +
         '<div class="field"><label>ID / License State or Country</label><input type="text" id="occ' + idx + '-id-state" placeholder="IL or United States"/></div>' +
         '<div class="occupant-label" style="margin-top:16px">Vehicle (optional)</div>' +
-        '<div class="field-row"><div class="field"><label>Year</label><input type="text" inputmode="numeric" id="occ' + idx + '-vehicle-year" placeholder="2022"/></div><div class="field"><label>Make</label><input type="text" id="occ' + idx + '-vehicle-make" placeholder="Toyota"/></div></div>' +
-        '<div class="field-row"><div class="field"><label>Model</label><input type="text" id="occ' + idx + '-vehicle-model" placeholder="Camry"/></div><div class="field"><label>Color</label><input type="text" id="occ' + idx + '-vehicle-color" placeholder="Blue"/></div></div>' +
-        '<div class="field-row"><div class="field"><label>License Plate</label><input type="text" id="occ' + idx + '-vehicle-plate" placeholder="ABC 123"/></div><div class="field"><label>Plate State</label><input type="text" id="occ' + idx + '-vehicle-state" placeholder="IL"/></div></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Year</label><input type="text" inputmode="numeric" id="occ' + idx + '-vehicle-year" placeholder="2022"/></div>' +
+          '<div class="field"><label>Make</label><input type="text" id="occ' + idx + '-vehicle-make" placeholder="Toyota"/></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Model</label><input type="text" id="occ' + idx + '-vehicle-model" placeholder="Camry"/></div>' +
+          '<div class="field"><label>Color</label><input type="text" id="occ' + idx + '-vehicle-color" placeholder="Blue"/></div>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>License Plate</label><input type="text" id="occ' + idx + '-vehicle-plate" placeholder="ABC 123"/></div>' +
+          '<div class="field"><label>Plate State</label><input type="text" id="occ' + idx + '-vehicle-state" placeholder="IL"/></div>' +
+        '</div>' +
       '</div>';
   }
   // Populate year + day dropdowns now that DOM is ready
@@ -892,13 +962,28 @@ function collectOccupants() {
   for (var i = 1; i <= n; i++) {
     list.push({
       first_name:   (document.getElementById('occ' + i + '-first')?.value    || '').trim(),
+      middle_name:  (document.getElementById('occ' + i + '-middle')?.value   || '').trim(),
       last_name:    (document.getElementById('occ' + i + '-last')?.value     || '').trim(),
       relationship: (document.getElementById('occ' + i + '-relation')?.value || '').trim(),
       dob:          collectOccDob(i),
+      date_of_birth: collectOccDob(i),
+      is_adult:     occupantIsAdult(i),
+      member_role:  occupantIsAdult(i) ? 'adult_occupant' : 'minor_occupant',
       email:        (document.getElementById('occ' + i + '-email')?.value    || '').trim(),
       phone:        (document.getElementById('occ' + i + '-phone')?.value    || '').trim(),
-      identification: { type:(document.getElementById('occ' + i + '-id-type')?.value || '').trim(), number:(document.getElementById('occ' + i + '-id-number')?.value || '').trim(), state:(document.getElementById('occ' + i + '-id-state')?.value || '').trim() },
-      vehicles: (document.getElementById('occ' + i + '-vehicle-make')?.value || document.getElementById('occ' + i + '-vehicle-plate')?.value) ? [{ year:(document.getElementById('occ' + i + '-vehicle-year')?.value || '').trim(), make:(document.getElementById('occ' + i + '-vehicle-make')?.value || '').trim(), model:(document.getElementById('occ' + i + '-vehicle-model')?.value || '').trim(), color:(document.getElementById('occ' + i + '-vehicle-color')?.value || '').trim(), plate:(document.getElementById('occ' + i + '-vehicle-plate')?.value || '').trim(), state:(document.getElementById('occ' + i + '-vehicle-state')?.value || '').trim() }] : [],
+      identification: {
+        type:   (document.getElementById('occ' + i + '-id-type')?.value || '').trim(),
+        number: (document.getElementById('occ' + i + '-id-number')?.value || '').trim(),
+        state:  (document.getElementById('occ' + i + '-id-state')?.value || '').trim(),
+      },
+      vehicles: (document.getElementById('occ' + i + '-vehicle-make')?.value || document.getElementById('occ' + i + '-vehicle-plate')?.value) ? [{
+        year:  (document.getElementById('occ' + i + '-vehicle-year')?.value || '').trim(),
+        make:  (document.getElementById('occ' + i + '-vehicle-make')?.value || '').trim(),
+        model: (document.getElementById('occ' + i + '-vehicle-model')?.value || '').trim(),
+        color: (document.getElementById('occ' + i + '-vehicle-color')?.value || '').trim(),
+        plate: (document.getElementById('occ' + i + '-vehicle-plate')?.value || '').trim(),
+        state: (document.getElementById('occ' + i + '-vehicle-state')?.value || '').trim(),
+      }] : [],
     });
   }
   return list;
@@ -1090,8 +1175,12 @@ function goStep1d() {
   var occupants = collectOccupants();
   for (var i = 0; i < occupants.length; i++) {
     var o = occupants[i];
-    if (!o.first_name || !o.last_name || !o.relationship || !o.dob) { setErr('err1c', 'Enter first name, last name, relationship, and date of birth for every occupant.'); return; }
-    if (!o.email && !o.phone) { setErr('err1c', 'Enter an email or phone number for every occupant.'); return; }
+    if (!o.first_name || !o.last_name || !o.relationship || !o.dob) {
+      setErr('err1c', 'Enter first name, last name, relationship, and date of birth for every occupant.'); return;
+    }
+    if (o.is_adult && (!o.email || !o.phone)) {
+      setErr('err1c', 'Every adult household member needs their own email and phone for screening consent. Contact details are not required for minors.'); return;
+    }
   }
   showStep('1d');
 }
@@ -1115,13 +1204,19 @@ async function saveStep1() {
       body: JSON.stringify({
         token,
         first_name:          v('first-name'),
+        middle_name:         v('middle-name'),
         last_name:           v('last-name'),
         date_of_birth:       dob,
         email:               v('email'),
         phone:               v('phone'),
         drivers_license:     v('drivers-license'),
-        identification: { type:'Driver License', number:v('drivers-license'), state:v('drivers-license-state') },
-        vehicles: (v('vehicle-make') || v('vehicle-plate')) ? [{ year:v('vehicle-year'), make:v('vehicle-make'), model:v('vehicle-model'), color:v('vehicle-color'), plate:v('vehicle-plate'), state:v('vehicle-state') }] : [],
+        identification: {
+          type: 'Driver License', number: v('drivers-license'), state: v('drivers-license-state'),
+        },
+        vehicles: (v('vehicle-make') || v('vehicle-plate')) ? [{
+          year:v('vehicle-year'), make:v('vehicle-make'), model:v('vehicle-model'),
+          color:v('vehicle-color'), plate:v('vehicle-plate'), state:v('vehicle-state'),
+        }] : [],
         address_street:      v('addr-street'),
         address_city:        v('addr-city'),
         address_state:       document.getElementById('addr-state').value,
@@ -1514,7 +1609,8 @@ async function startSigning() {
 
 // ── Init ──────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
-  if (isPhase2) loadPhase2();
+  if (screeningToken) loadAdultScreening();
+  else if (isPhase2) loadPhase2();
   else          loadPhase1();
 });
 </script>
