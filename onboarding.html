@@ -566,13 +566,13 @@
         <div style="margin-top:8px;margin-bottom:0">
           <label class="check-row">
             <input type="checkbox" id="screening-authorized"/>
-            I have authorized and submitted my screening application.
+            I authorize my individual screening and understand I will continue to the screening provider to complete identity details and payment.
           </label>
         </div>
         <div id="err3-screening" class="err-msg"></div>
       </div>
 
-      <button class="btn btn-success" id="btn3-submit" onclick="completePhase1()">Submit Application →</button>
+      <button class="btn btn-success" id="btn3-submit" onclick="completePhase1()">Submit &amp; Continue to Screening →</button>
       <button class="btn btn-secondary" onclick="showStep('2b')">← Back</button>
       <div class="secure-note">🔒 Your application is securely submitted to your landlord for review.</div>
     </div>
@@ -937,6 +937,12 @@ function updateOccupants() {
           '<div class="field"><label>Email</label><input type="email" id="occ' + idx + '-email" placeholder="email@example.com"/></div>' +
           '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
         '</div>' +
+        '<div class="field"><label>Occupation</label><select id="occ' + idx + '-occupation"><option value="">Select</option><option value="student">Student</option><option value="employed">Employed</option><option value="self_employed">Self-employed</option></select></div>' +
+        '<div class="field"><label>Occupation Details</label><textarea id="occ' + idx + '-occupation-details" placeholder="School and program, employer and job title, or self-employment/business details"></textarea></div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Employer / School</label><input type="text" id="occ' + idx + '-employer" placeholder="Company, business, or school"/></div>' +
+          '<div class="field"><label>Monthly Income <span class="field-optional">(if applicable)</span></label><input type="number" min="0" inputmode="decimal" id="occ' + idx + '-income" placeholder="0"/></div>' +
+        '</div>' +
         '<div class="field-row">' +
           '<div class="field"><label>Government ID Type</label><select id="occ' + idx + '-id-type"><option value="">Select</option><option>Driver License</option><option>State ID</option><option>Passport</option><option>Other</option></select></div>' +
           '<div class="field"><label>ID / License Number</label><input type="text" id="occ' + idx + '-id-number" placeholder="ID number"/></div>' +
@@ -976,6 +982,10 @@ function collectOccupants() {
       member_role:  occupantIsAdult(i) ? 'adult_occupant' : 'minor_occupant',
       email:        (document.getElementById('occ' + i + '-email')?.value    || '').trim(),
       phone:        (document.getElementById('occ' + i + '-phone')?.value    || '').trim(),
+      occupation_status: (document.getElementById('occ' + i + '-occupation')?.value || '').trim(),
+      occupation_details: (document.getElementById('occ' + i + '-occupation-details')?.value || '').trim(),
+      employer_name: (document.getElementById('occ' + i + '-employer')?.value || '').trim(),
+      monthly_income: Number(document.getElementById('occ' + i + '-income')?.value || 0) || null,
       identification: {
         type:   (document.getElementById('occ' + i + '-id-type')?.value || '').trim(),
         number: (document.getElementById('occ' + i + '-id-number')?.value || '').trim(),
@@ -1182,6 +1192,7 @@ function goStep1c() {
 function goStep1d() {
   setErr('err1c', '');
   var occupants = collectOccupants();
+  var adultEmails = [v('email').toLowerCase()];
   for (var i = 0; i < occupants.length; i++) {
     var o = occupants[i];
     if (!o.first_name || !o.last_name || !o.relationship || !o.dob) {
@@ -1189,6 +1200,19 @@ function goStep1d() {
     }
     if (o.is_adult && (!o.email || !o.phone)) {
       setErr('err1c', 'Every adult household member needs their own email and phone for screening consent. Contact details are not required for minors.'); return;
+    }
+    if (o.is_adult && !o.occupation_status) {
+      setErr('err1c', 'Select Student, Employed, or Self-employed for every adult household member.'); return;
+    }
+    if (o.is_adult && !o.occupation_details) {
+      setErr('err1c', 'Enter occupation details for every adult household member.'); return;
+    }
+    if (o.is_adult) {
+      var normalizedEmail = o.email.trim().toLowerCase();
+      if (adultEmails.indexOf(normalizedEmail) >= 0) {
+        setErr('err1c', 'Each adult must use a different email address for their private screening consent.'); return;
+      }
+      adultEmails.push(normalizedEmail);
     }
   }
   showStep('1d');
@@ -1383,11 +1407,16 @@ async function completePhase1() {
     }
     document.getElementById('main').style.display = '';
     showStep('p1-complete');
-    setBtn('btn3-submit', false, 'Submit Application →');
+    setBtn('btn3-submit', false, 'Submit & Continue to Screening →');
     busy = false;
+    if (json.screeningUrl) {
+      var successBody = document.querySelector('#p1-complete .success-body');
+      if (successBody) successBody.textContent = 'Application saved. Redirecting you to the screening provider to complete screening and payment…';
+      window.setTimeout(function() { window.location.assign(json.screeningUrl); }, 900);
+    }
   } catch (err) {
     setErr('err3-screening', err.message || 'Could not submit. Please try again.');
-    setBtn('btn3-submit', false, 'Submit Application →');
+    setBtn('btn3-submit', false, 'Submit & Continue to Screening →');
     busy = false;
   }
 }
