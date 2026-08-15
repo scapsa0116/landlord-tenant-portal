@@ -585,10 +585,10 @@
     <!-- Phase 1 Complete -->
     <div id="p1-complete" class="success-view">
       <div class="success-icon">🎉</div>
-      <div class="success-title">Stage 1 Complete!</div>
-      <div class="success-body">Your household application and screening information were submitted for landlord review.</div>
+      <div class="success-title">Thank You — Stage 1 Is Complete!</div>
+      <div class="success-body">Your tenant onboarding application has been submitted to the landlord for review.</div>
       <div class="success-detail" id="p1-summary"></div>
-      <p style="font-size:13px;color:#6B7280;line-height:1.7">If your household is approved, you will receive another secure notification for Stage 2: purchase or confirm liability insurance, set up rent payments, and review and sign the lease.</p>
+      <p style="font-size:13px;color:#6B7280;line-height:1.7">If your application is approved, you will receive another secure notification to complete Stage 2: purchase or confirm liability insurance, set up rent payments, and review and sign the lease.</p>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════
@@ -1524,11 +1524,6 @@ async function completePhase1() {
     showStep('p1-complete');
     setBtn('btn3-submit', false, 'Submit & Continue to Screening →');
     busy = false;
-    if (json.screeningUrl) {
-      var successBody = document.querySelector('#p1-complete .success-body');
-      if (successBody) successBody.textContent = 'Application saved. Redirecting you to the screening provider to complete screening and payment…';
-      window.setTimeout(function() { window.location.assign(json.screeningUrl); }, 900);
-    }
   } catch (err) {
     setErr('err3-screening', err.message || 'Could not submit. Please try again.');
     setBtn('btn3-submit', false, 'Submit & Continue to Screening →');
