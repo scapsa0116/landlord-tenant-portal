@@ -1284,6 +1284,13 @@ function goStep1b() {
   if (!v('last-name'))  { setErr('err1a', 'Please enter your last name.'); return; }
   if (!v('email') || !v('email').includes('@')) { setErr('err1a', 'Please enter a valid email address.'); return; }
   if (!v('phone'))      { setErr('err1a', 'Please enter your phone number.'); return; }
+  if (!v('dob-month') || !v('dob-day') || !v('dob-year')) { setErr('err1a', 'Please enter your complete date of birth.'); return; }
+  if (!v('identity-type') || !v('drivers-license') || !v('drivers-license-state')) {
+    setErr('err1a', 'Select your identity document and enter its number and issuing state or country.'); return;
+  }
+  if (!document.getElementById('upload-identity')?.files?.length) {
+    setErr('err1a', 'Add a photo or file of your identity document.'); return;
+  }
   showStep('1b');
 }
 
@@ -1398,6 +1405,8 @@ async function saveStep1(advance) {
 // ── STEP 2 NAVIGATION ─────────────────────────────────────────
 function goStep2b() {
   setErr('err2a', '');
+  if (!v('occupation-status')) { setErr('err2a', 'Please select your occupation status.'); return; }
+  if (!v('occupation-details')) { setErr('err2a', 'Please enter your occupation details.'); return; }
   if (!v('employer'))       { setErr('err2a', 'Please enter your employer name.'); return; }
   if (!v('position'))       { setErr('err2a', 'Please enter your position/job title.'); return; }
   var inc = Number(document.getElementById('monthly-income').value);
