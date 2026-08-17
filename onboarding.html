@@ -430,7 +430,6 @@
       <div class="card">
         <div class="card-title">Current Employment</div>
         <div class="field"><label for="occupation-status">Occupation</label><select id="occupation-status"><option value="">Select</option><option value="student">Student</option><option value="employed">Employed</option><option value="self_employed">Self-employed</option></select></div>
-        <div class="field"><label for="occupation-details">Occupation Details</label><textarea id="occupation-details" placeholder="School and program, employer and job title, or business/self-employment details"></textarea></div>
         <div class="field">
           <label for="employer">Employer Name</label>
           <input id="employer" type="text" placeholder="Acme Corporation"/>
@@ -451,6 +450,11 @@
           </div>
         </div>
 
+        <div class="section-hdr">Employer / School Address</div>
+        <div class="field"><label for="employer-street">Street Address</label><input id="employer-street" type="text" placeholder="123 Business Ave"/></div>
+        <div class="field-row"><div class="field"><label for="employer-city">City</label><input id="employer-city" type="text" placeholder="Chicago"/></div><div class="field"><label for="employer-state">State</label><input id="employer-state" type="text" placeholder="IL" maxlength="30"/></div></div>
+        <div class="field"><label for="employer-zip">ZIP Code</label><input id="employer-zip" type="text" placeholder="60601" inputmode="numeric"/></div>
+
         <div class="section-hdr">Supervisor Contact <span class="field-optional">optional</span></div>
         <div class="field-row">
           <div class="field">
@@ -462,19 +466,17 @@
             <input id="supervisor-last" type="text" placeholder="Manager last name"/>
           </div>
         </div>
+        <div class="field"><label for="supervisor-phone">Phone Number</label><input id="supervisor-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/></div>
 
         <div class="section-hdr">Previous Landlord <span class="field-optional">optional</span></div>
         <div class="field-row">
           <div class="field">
-            <label for="supervisor-phone">Supervisor Phone</label>
-            <input id="supervisor-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/>
-          </div>
-          <div class="field">
             <label for="prev-ll-first">First Name</label>
             <input id="prev-ll-first" type="text" placeholder="John"/>
           </div>
+          <div class="field"><label for="prev-ll-last">Last Name</label><input id="prev-ll-last" type="text" placeholder="Smith"/></div>
         </div>
-        <div class="field-row"><div class="field"><label for="prev-ll-last">Last Name</label><input id="prev-ll-last" type="text" placeholder="Smith"/></div><div class="field"><label for="prev-ll-phone">Phone</label><input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/></div></div>
+        <div class="field"><label for="prev-ll-phone">Phone Number</label><input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/></div>
         <div id="err2a" class="err-msg"></div>
       </div>
       <button class="btn btn-primary" id="btn2a" onclick="goStep2b()">Next: Documents →</button>
@@ -728,6 +730,7 @@ var selectedPayMethod = 'bank';
 var identityDone    = false;
 var petCount        = 1;
 var incomeRowCount  = 0;
+var occupantIncomeCounts = {};
 var attachedDocs    = {};
 
 // ── Utilities ─────────────────────────────────────────────────
@@ -945,11 +948,27 @@ function updateOccupants() {
           '<div class="field"><label>Phone</label><input type="tel" id="occ' + idx + '-phone" placeholder="(555) 123-4567"/></div>' +
         '</div>' +
         '<div class="field"><label>Occupation</label><select id="occ' + idx + '-occupation"><option value="">Select</option><option value="student">Student</option><option value="employed">Employed</option><option value="self_employed">Self-employed</option></select></div>' +
-        '<div class="field"><label>Occupation Details</label><textarea id="occ' + idx + '-occupation-details" placeholder="School and program, employer and job title, or self-employment/business details"></textarea></div>' +
         '<div class="field-row">' +
           '<div class="field"><label>Employer / School</label><input type="text" id="occ' + idx + '-employer" placeholder="Company, business, or school"/></div>' +
-          '<div class="field"><label>Monthly Income <span class="field-optional">(if applicable)</span></label><input type="number" min="0" inputmode="decimal" id="occ' + idx + '-income" placeholder="0"/></div>' +
+          '<div class="field"><label>Job Title / Program</label><input type="text" id="occ' + idx + '-position" placeholder="Position or study program"/></div>' +
         '</div>' +
+        '<div class="field-row">' +
+          '<div class="field"><label>Monthly Income <span class="field-optional">(if applicable)</span></label><input type="number" min="0" inputmode="decimal" id="occ' + idx + '-income" placeholder="0"/></div>' +
+          '<div class="field"><label>How Long?</label><input id="occ' + idx + '-employment-length" placeholder="2 years"/></div>' +
+        '</div>' +
+        '<div class="occupant-label" style="margin-top:16px">Employer / School Address</div>' +
+        '<div class="field"><label>Street Address</label><input id="occ' + idx + '-employer-street" placeholder="123 Business Ave"/></div>' +
+        '<div class="field-row"><div class="field"><label>City</label><input id="occ' + idx + '-employer-city"/></div><div class="field"><label>State</label><input id="occ' + idx + '-employer-state"/></div></div>' +
+        '<div class="field"><label>ZIP Code</label><input id="occ' + idx + '-employer-zip" inputmode="numeric"/></div>' +
+        '<div class="occupant-label" style="margin-top:16px">Supervisor Contact (optional)</div>' +
+        '<div class="field-row"><div class="field"><label>First Name</label><input id="occ' + idx + '-supervisor-first"/></div><div class="field"><label>Last Name</label><input id="occ' + idx + '-supervisor-last"/></div></div>' +
+        '<div class="field"><label>Phone Number</label><input type="tel" id="occ' + idx + '-supervisor-phone"/></div>' +
+        '<div class="occupant-label" style="margin-top:16px">Previous Landlord (optional)</div>' +
+        '<div class="field-row"><div class="field"><label>First Name</label><input id="occ' + idx + '-landlord-first"/></div><div class="field"><label>Last Name</label><input id="occ' + idx + '-landlord-last"/></div></div>' +
+        '<div class="field"><label>Phone Number</label><input type="tel" id="occ' + idx + '-landlord-phone"/></div>' +
+        '<div class="doc-upload-row" onclick="document.getElementById(\'occ' + idx + '-income-file\').click()"><div class="doc-upload-icon">📄</div><div class="doc-upload-label">Main Income Support Document</div><div class="doc-upload-status" id="occ' + idx + '-income-status">Tap to add</div><input type="file" class="doc-upload-input" id="occ' + idx + '-income-file" accept=".pdf,.jpg,.jpeg,.png" onchange="markDynamicFile(\'occ' + idx + '-income-file\',\'occ' + idx + '-income-status\')"/></div>' +
+        '<div class="occupant-label" style="margin-top:16px">Additional Income (optional)</div>' +
+        '<div id="occ' + idx + '-extra-income"></div><button class="btn btn-secondary" type="button" onclick="addOccupantIncomeSource(' + idx + ')">+ Add Income Source</button>' +
         '<div class="field-row">' +
           '<div class="field"><label>Government ID Type</label><select id="occ' + idx + '-id-type"><option value="">Select</option><option>Driver License</option><option>State ID</option><option>Passport</option><option>Other</option></select></div>' +
           '<div class="field"><label>ID / License Number</label><input type="text" id="occ' + idx + '-id-number" placeholder="ID number"/></div>' +
@@ -991,9 +1010,30 @@ function collectOccupants() {
       email:        (document.getElementById('occ' + i + '-email')?.value    || '').trim(),
       phone:        (document.getElementById('occ' + i + '-phone')?.value    || '').trim(),
       occupation_status: (document.getElementById('occ' + i + '-occupation')?.value || '').trim(),
-      occupation_details: (document.getElementById('occ' + i + '-occupation-details')?.value || '').trim(),
+      position: (document.getElementById('occ' + i + '-position')?.value || '').trim(),
       employer_name: (document.getElementById('occ' + i + '-employer')?.value || '').trim(),
       monthly_income: Number(document.getElementById('occ' + i + '-income')?.value || 0) || null,
+      employment_details: {
+        length: (document.getElementById('occ' + i + '-employment-length')?.value || '').trim(),
+        address: {
+          street: (document.getElementById('occ' + i + '-employer-street')?.value || '').trim(),
+          city: (document.getElementById('occ' + i + '-employer-city')?.value || '').trim(),
+          state: (document.getElementById('occ' + i + '-employer-state')?.value || '').trim(),
+          zip: (document.getElementById('occ' + i + '-employer-zip')?.value || '').trim(),
+        },
+        supervisor: {
+          first_name: (document.getElementById('occ' + i + '-supervisor-first')?.value || '').trim(),
+          last_name: (document.getElementById('occ' + i + '-supervisor-last')?.value || '').trim(),
+          phone: (document.getElementById('occ' + i + '-supervisor-phone')?.value || '').trim(),
+        },
+        previous_landlord: {
+          first_name: (document.getElementById('occ' + i + '-landlord-first')?.value || '').trim(),
+          last_name: (document.getElementById('occ' + i + '-landlord-last')?.value || '').trim(),
+          phone: (document.getElementById('occ' + i + '-landlord-phone')?.value || '').trim(),
+        },
+        support_document: document.getElementById('occ' + i + '-income-file')?.files?.[0]?.name || null,
+      },
+      additional_income: collectOccupantAdditionalIncome(i),
       identification: {
         type:   (document.getElementById('occ' + i + '-id-type')?.value || '').trim(),
         number: (document.getElementById('occ' + i + '-id-number')?.value || '').trim(),
@@ -1063,10 +1103,17 @@ function addIncomeSource() {
   var div = document.createElement('div');
   div.className = 'occupant-block';
   div.innerHTML =
+    '<div class="occupant-label">Additional Income Source ' + (idx + 1) + '</div>' +
     '<div class="field-row">' +
       '<div class="field"><label>Source</label><input type="text" id="income' + idx + '-src" placeholder="Part-time job, Freelance…"/></div>' +
       '<div class="field"><label>Monthly (USD)</label><input type="number" id="income' + idx + '-amt" placeholder="500" inputmode="decimal"/></div>' +
-    '</div>';
+    '</div>' +
+    '<div class="field-row"><div class="field"><label>Contact First Name</label><input id="income' + idx + '-contact-first" placeholder="First"/></div><div class="field"><label>Contact Last Name</label><input id="income' + idx + '-contact-last" placeholder="Last"/></div></div>' +
+    '<div class="field"><label>Contact Phone</label><input type="tel" id="income' + idx + '-contact-phone" placeholder="(555) 123-4567"/></div>' +
+    '<div class="field"><label>Source Address</label><input id="income' + idx + '-street" placeholder="Street address"/></div>' +
+    '<div class="field-row"><div class="field"><label>City</label><input id="income' + idx + '-city"/></div><div class="field"><label>State</label><input id="income' + idx + '-state"/></div></div>' +
+    '<div class="field"><label>ZIP Code</label><input id="income' + idx + '-zip" inputmode="numeric"/></div>' +
+    '<div class="doc-upload-row" onclick="document.getElementById(\'income' + idx + '-file\').click()"><div class="doc-upload-icon">📄</div><div class="doc-upload-label">Income Support Document</div><div class="doc-upload-status" id="income' + idx + '-file-status">Tap to add</div><input type="file" class="doc-upload-input" id="income' + idx + '-file" accept=".pdf,.jpg,.jpeg,.png" onchange="markDynamicFile(\'income' + idx + '-file\',\'income' + idx + '-file-status\')"/></div>';
   c.appendChild(div);
 }
 
@@ -1075,7 +1122,65 @@ function collectAdditionalIncome() {
   for (var i = 0; i < incomeRowCount; i++) {
     var src = (document.getElementById('income' + i + '-src')?.value || '').trim();
     var amt = document.getElementById('income' + i + '-amt')?.value;
-    if (src) list.push({ source: src, amount: Number(amt) || 0 });
+    if (src) list.push({
+      source: src, amount: Number(amt) || 0,
+      contact: {
+        first_name: (document.getElementById('income' + i + '-contact-first')?.value || '').trim(),
+        last_name: (document.getElementById('income' + i + '-contact-last')?.value || '').trim(),
+        phone: (document.getElementById('income' + i + '-contact-phone')?.value || '').trim(),
+      },
+      address: {
+        street: (document.getElementById('income' + i + '-street')?.value || '').trim(),
+        city: (document.getElementById('income' + i + '-city')?.value || '').trim(),
+        state: (document.getElementById('income' + i + '-state')?.value || '').trim(),
+        zip: (document.getElementById('income' + i + '-zip')?.value || '').trim(),
+      },
+      support_document: document.getElementById('income' + i + '-file')?.files?.[0]?.name || null,
+    });
+  }
+  return list;
+}
+
+function addOccupantIncomeSource(occupantIndex) {
+  var idx = occupantIncomeCounts[occupantIndex] || 0;
+  occupantIncomeCounts[occupantIndex] = idx + 1;
+  var box = document.getElementById('occ' + occupantIndex + '-extra-income');
+  var div = document.createElement('div');
+  div.className = 'occupant-block';
+  var p = 'occ' + occupantIndex + '-income' + idx;
+  div.innerHTML =
+    '<div class="field-row"><div class="field"><label>Source</label><input id="' + p + '-source" placeholder="Part-time work, benefits…"/></div><div class="field"><label>Monthly Income</label><input type="number" min="0" id="' + p + '-amount"/></div></div>' +
+    '<div class="field-row"><div class="field"><label>Contact First Name</label><input id="' + p + '-first"/></div><div class="field"><label>Contact Last Name</label><input id="' + p + '-last"/></div></div>' +
+    '<div class="field"><label>Contact Phone</label><input type="tel" id="' + p + '-phone"/></div>' +
+    '<div class="field"><label>Source Address</label><input id="' + p + '-street" placeholder="Street address"/></div>' +
+    '<div class="field-row"><div class="field"><label>City</label><input id="' + p + '-city"/></div><div class="field"><label>State</label><input id="' + p + '-state"/></div></div>' +
+    '<div class="field"><label>ZIP Code</label><input id="' + p + '-zip" inputmode="numeric"/></div>' +
+    '<div class="doc-upload-row" onclick="document.getElementById(\'' + p + '-file\').click()"><div class="doc-upload-icon">📄</div><div class="doc-upload-label">Income Support Document</div><div class="doc-upload-status" id="' + p + '-status">Tap to add</div><input type="file" class="doc-upload-input" id="' + p + '-file" accept=".pdf,.jpg,.jpeg,.png" onchange="markDynamicFile(\'' + p + '-file\',\'' + p + '-status\')"/></div>';
+  box.appendChild(div);
+}
+
+function collectOccupantAdditionalIncome(occupantIndex) {
+  var list = [];
+  var count = occupantIncomeCounts[occupantIndex] || 0;
+  for (var i = 0; i < count; i++) {
+    var p = 'occ' + occupantIndex + '-income' + i;
+    var source = (document.getElementById(p + '-source')?.value || '').trim();
+    if (!source) continue;
+    list.push({
+      source: source, amount: Number(document.getElementById(p + '-amount')?.value || 0) || 0,
+      contact: {
+        first_name: (document.getElementById(p + '-first')?.value || '').trim(),
+        last_name: (document.getElementById(p + '-last')?.value || '').trim(),
+        phone: (document.getElementById(p + '-phone')?.value || '').trim(),
+      },
+      address: {
+        street: (document.getElementById(p + '-street')?.value || '').trim(),
+        city: (document.getElementById(p + '-city')?.value || '').trim(),
+        state: (document.getElementById(p + '-state')?.value || '').trim(),
+        zip: (document.getElementById(p + '-zip')?.value || '').trim(),
+      },
+      support_document: document.getElementById(p + '-file')?.files?.[0]?.name || null,
+    });
   }
   return list;
 }
@@ -1102,6 +1207,15 @@ function markOccupantIdAttached(idx) {
   }
 }
 
+function markDynamicFile(inputId, statusId) {
+  var input = document.getElementById(inputId);
+  var status = document.getElementById(statusId);
+  if (input?.files?.[0] && status) {
+    status.textContent = '✓ ' + input.files[0].name.substring(0, 22);
+    status.className = 'doc-upload-status doc-attached';
+  }
+}
+
 // Consolidate the legacy sub-sections into the requested three-page Phase 1
 // without duplicating controls or breaking existing saved invite fields.
 function configureThreePagePhase1() {
@@ -1120,12 +1234,13 @@ function configureThreePagePhase1() {
   moveCards('step1b', personalPage);
   moveCards('step2a', personalPage);
   moveCards('step1c', personalPage);
+  // Income and supporting evidence belong on the first Phase 1 page.
+  moveCards('step2b', personalPage);
   var page1Button = document.getElementById('btn1a');
   page1Button.textContent = 'Next: Income & Background →';
   page1Button.onclick = goPhase1Income;
 
   // Page 2: income evidence and legal/history questions.
-  moveCards('step2b', incomePage);
   moveCards('step1d', incomePage);
   var page2Button = document.getElementById('btn2a');
   page2Button.textContent = 'Save & Continue to Screening →';
@@ -1142,16 +1257,19 @@ function configureThreePagePhase1() {
 function goPhase1Income() {
   setErr('err1a', '');
   if (!v('first-name') || !v('last-name')) return setErr('err1a', 'Enter your first and last name.');
+  if (!v('dob-month') || !v('dob-day') || !v('dob-year')) return setErr('err1a', 'Enter your complete date of birth.');
   if (!v('email') || !v('email').includes('@') || !v('phone')) return setErr('err1a', 'Enter a valid email and phone number.');
   if (!v('identity-type') || !v('drivers-license')) return setErr('err1a', 'Select an identity document type and enter its number.');
   if (!document.getElementById('upload-identity')?.files?.[0]) return setErr('err1a', 'Add a photo or file of your identity document.');
   if (!v('addr-street') || !v('addr-city') || !v('addr-state') || !v('addr-zip')) return setErr('err1a', 'Complete your current address.');
-  if (!v('occupation-status') || !v('occupation-details') || !v('employer') || !v('position')) return setErr('err1a', 'Complete your occupation, details, employer or school information.');
+  if (!v('occupation-status') || !v('employer') || !v('position')) return setErr('err1a', 'Complete your occupation, employer or school, and job title or program.');
+  if (!v('employer-street') || !v('employer-city') || !v('employer-state') || !v('employer-zip')) return setErr('err1a', 'Complete the employer or school address.');
   var occupants = collectOccupants(), seen = [v('email').toLowerCase()];
   for (var i=0; i<occupants.length; i++) {
     var o=occupants[i];
     if (!o.first_name || !o.last_name || !o.relationship || !o.dob) return setErr('err1a', 'Complete the name, relationship and birth date for every resident.');
-    if (o.is_adult && (!o.email || !o.phone || !o.occupation_status || !o.occupation_details)) return setErr('err1a', 'Every additional adult needs contact and occupation information.');
+    if (o.is_adult && (!o.email || !o.phone || !o.occupation_status || !o.employer_name || !o.position)) return setErr('err1a', 'Every additional adult needs contact, employer or school, and job title or program information.');
+    if (o.is_adult && (!o.employment_details.address.street || !o.employment_details.address.city || !o.employment_details.address.state || !o.employment_details.address.zip)) return setErr('err1a', 'Complete the employer or school address for every additional adult.');
     if (o.is_adult && seen.includes(o.email.toLowerCase())) return setErr('err1a', 'Each adult must use a different email address.');
     if (o.is_adult) seen.push(o.email.toLowerCase());
   }
@@ -1185,12 +1303,36 @@ async function uploadAllIdentityFiles() {
   }
 }
 
+async function uploadAllIncomeFiles() {
+  for (var key of ['paystub','bank','offer']) {
+    var primaryFile = document.getElementById('upload-' + key)?.files?.[0];
+    if (primaryFile) await uploadIdentityFile(primaryFile, 'income_support', 'primary-' + key);
+  }
+  for (var i = 0; i < incomeRowCount; i++) {
+    var extraFile = document.getElementById('income' + i + '-file')?.files?.[0];
+    if (extraFile) await uploadIdentityFile(extraFile, 'additional_income_support', 'primary-additional-' + i);
+  }
+  var occupants = parseInt(v('num-occupants')) || 0;
+  for (var occupant = 1; occupant <= occupants; occupant++) {
+    var mainFile = document.getElementById('occ' + occupant + '-income-file')?.files?.[0];
+    if (mainFile) await uploadIdentityFile(mainFile, 'income_support', 'occupant-' + occupant + '-main');
+    var count = occupantIncomeCounts[occupant] || 0;
+    for (var j = 0; j < count; j++) {
+      var file = document.getElementById('occ' + occupant + '-income' + j + '-file')?.files?.[0];
+      if (file) await uploadIdentityFile(file, 'additional_income_support', 'occupant-' + occupant + '-additional-' + j);
+    }
+  }
+}
+
 async function savePhase1Page2() {
   setErr('err1d', '');
   if (!Number(document.getElementById('monthly-income').value)) return setErr('err1d', 'Enter your gross monthly income.');
   if (!chk('disclosure-agree') || !v('e-sig')) return setErr('err1d', 'Accept the disclosures and enter your electronic signature.');
   var saved = await saveStep1(false); if (!saved) return;
-  try { await uploadAllIdentityFiles(); } catch(e) { setErr('err1d', e.message || 'Identity document upload failed.'); return; }
+  try {
+    await uploadAllIdentityFiles();
+    await uploadAllIncomeFiles();
+  } catch(e) { setErr('err1d', e.message || 'Document upload failed.'); return; }
   await saveStep2();
 }
 
@@ -1320,8 +1462,8 @@ function goStep1d() {
     if (o.is_adult && !o.occupation_status) {
       setErr('err1c', 'Select Student, Employed, or Self-employed for every adult household member.'); return;
     }
-    if (o.is_adult && !o.occupation_details) {
-      setErr('err1c', 'Enter occupation details for every adult household member.'); return;
+    if (o.is_adult && (!o.employer_name || !o.position)) {
+      setErr('err1c', 'Enter employer or school and job title or program for every adult household member.'); return;
     }
     if (o.is_adult) {
       var normalizedEmail = o.email.trim().toLowerCase();
@@ -1406,7 +1548,6 @@ async function saveStep1(advance) {
 function goStep2b() {
   setErr('err2a', '');
   if (!v('occupation-status')) { setErr('err2a', 'Please select your occupation status.'); return; }
-  if (!v('occupation-details')) { setErr('err2a', 'Please enter your occupation details.'); return; }
   if (!v('employer'))       { setErr('err2a', 'Please enter your employer name.'); return; }
   if (!v('position'))       { setErr('err2a', 'Please enter your position/job title.'); return; }
   var inc = Number(document.getElementById('monthly-income').value);
@@ -1427,7 +1568,10 @@ async function saveStep2() {
         employer:            v('employer'),
         position:            v('position'),
         occupation_status:   v('occupation-status'),
-        occupation_details:  v('occupation-details'),
+        employer_address: {
+          street: v('employer-street'), city: v('employer-city'),
+          state: v('employer-state'), zip: v('employer-zip'),
+        },
         monthly_income:      Number(document.getElementById('monthly-income').value) || null,
         employment_length:   v('emp-length'),
         supervisor_first_name: v('supervisor-first'),
