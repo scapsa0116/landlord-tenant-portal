@@ -35,8 +35,9 @@
     .step-item.done .step-label{color:#2DC98E}
 
     /* Cards */
-    .card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 2px 20px rgba(67,97,238,.08)}
-    .card-title{font-size:13px;font-weight:800;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:20px}
+    .card{background:#fff;border:1px solid #E1E7FF;border-left:5px solid #4361EE;border-radius:20px;padding:24px;margin-bottom:20px;box-shadow:0 8px 28px rgba(67,97,238,.10)}
+    .card-title{font-size:19px;font-weight:900;color:#1A1D2E;letter-spacing:-.2px;margin:-4px 0 22px;padding:0 0 13px;border-bottom:3px solid #E9EDFF}
+    .card-title .field-optional{font-size:12px;font-weight:700;color:#8B94A7;letter-spacing:0}
 
     /* Fields */
     .field{margin-bottom:18px}
@@ -52,7 +53,7 @@
     .field-row .field{flex:1;min-width:0}
 
     /* Section headers */
-    .section-hdr{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 10px;padding-bottom:8px;border-bottom:2px solid #EEF1FD}
+    .section-hdr{font-size:14px;font-weight:900;color:#3346B8;letter-spacing:.15px;margin:24px 0 13px;padding:10px 12px;background:#F1F4FF;border-left:4px solid #4361EE;border-radius:9px}
 
     /* DOB dropdowns (shared across all date-of-birth fields) */
     .dob-row{display:flex;gap:8px}
@@ -64,10 +65,10 @@
     .check-row input[type="checkbox"]{width:20px;height:20px;min-width:20px;accent-color:#4361EE;cursor:pointer;margin-top:2px}
 
     /* Occupant/Pet blocks */
-    .occupant-block{background:#F8F9FF;border-radius:14px;padding:16px;margin-top:12px;border:1.5px solid #E8EAF2}
-    .occupant-label{font-size:11px;font-weight:800;color:#4361EE;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
-    .pet-block{background:#F8F9FF;border-radius:14px;padding:16px;margin-top:12px;border:1.5px solid #E8EAF2}
-    .pet-label{font-size:11px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+    .occupant-block{background:#F8F9FF;border-radius:16px;padding:18px;margin-top:16px;border:2px solid #DDE4FF}
+    .occupant-label{font-size:15px;font-weight:900;color:#3346B8;letter-spacing:.1px;margin-bottom:15px;padding:9px 11px;background:#E9EDFF;border-radius:9px}
+    .pet-block{background:#F8F9FF;border-radius:16px;padding:18px;margin-top:16px;border:2px solid #DDE4FF}
+    .pet-label{font-size:15px;font-weight:900;color:#3346B8;letter-spacing:.1px;margin-bottom:14px}
 
     /* Disclosures */
     .disclosure-box{background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;color:#1A1D2E;line-height:1.75}
@@ -245,7 +246,7 @@
 
     <!-- STEP 1a — Basic Personal Info -->
     <div id="step1a">
-      <div class="card">
+      <div class="card" id="personal-information-card">
         <div class="card-title">Personal Information</div>
         <div class="field-row">
           <div class="field">
@@ -283,7 +284,9 @@
           <input type="file" id="upload-identity" class="doc-upload-input" accept="image/*,.pdf" capture="environment" onchange="markAttached('identity')"/>
         </div>
         <div class="field-hint" style="margin-bottom:18px">Use your camera or select a JPG, PNG, or PDF. Stored privately and visible only to your landlord.</div>
-        <div class="card-title" style="margin-top:20px">Vehicle <span class="field-optional">(optional)</span></div>
+      </div>
+      <div class="card" id="vehicle-card">
+        <div class="card-title">Vehicle <span class="field-optional">(optional)</span></div>
         <div class="field-row"><div class="field"><label for="vehicle-make">Make</label><input id="vehicle-make" placeholder="Toyota"/></div><div class="field"><label for="vehicle-model">Model</label><input id="vehicle-model" placeholder="Camry"/></div></div>
         <div class="field"><label for="vehicle-color">Color</label><input id="vehicle-color" placeholder="Blue"/></div>
         <div class="field-row"><div class="field"><label for="vehicle-plate">License Plate</label><input id="vehicle-plate" placeholder="ABC 123"/></div><div class="field"><label for="vehicle-state">Plate State</label><select id="vehicle-state" class="vehicle-state-select"><option value="">Select state</option></select></div></div>
@@ -295,7 +298,7 @@
 
     <!-- STEP 1b — Addresses + Emergency Contact -->
     <div id="step1b" style="display:none">
-      <div class="card">
+      <div class="card" id="current-address-card">
         <div class="card-title">Current Address</div>
         <div class="field">
           <label for="addr-street">Street</label>
@@ -317,7 +320,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="emergency-contact-card">
         <div class="card-title">Emergency Contact</div>
         <div class="field-row">
           <div class="field"><label for="ec-first">First Name</label><input id="ec-first" type="text" placeholder="John"/></div>
@@ -341,7 +344,7 @@
 
     <!-- STEP 1c — Occupants + Pets -->
     <div id="step1c" style="display:none">
-      <div class="card">
+      <div class="card" id="household-occupants-card">
         <div class="card-title">Who will live in this home?</div>
         <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Add every adult and minor in the household. Each adult must use their own email and phone so they can provide screening consent directly. Minors are occupants only and are not screened.</p>
         <div class="field">
@@ -358,7 +361,7 @@
         <div id="occupants-container"></div>
       </div>
 
-      <div class="card">
+      <div class="card" id="pets-card">
         <div class="card-title">Pets</div>
         <div class="check-group">
           <label class="check-row">
@@ -387,7 +390,7 @@
 
     <!-- STEP 1d — Background + Disclosure + E-Sig -->
     <div id="step1d" style="display:none">
-      <div class="card">
+      <div class="card" id="current-employment-card">
         <div class="card-title">Background Questions</div>
         <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Please answer all questions honestly. Incomplete or false information may result in denial.</p>
         <div class="check-group">
@@ -1265,6 +1268,19 @@ function configureThreePagePhase1() {
   moveCards('step1c', personalPage);
   // Income and supporting evidence belong on the first Phase 1 page.
   moveCards('step2b', personalPage);
+  // Keep related questions in a predictable visual sequence. In particular,
+  // additional income must appear before the household/occupant questionnaire.
+  var orderedCardIds = [
+    'personal-information-card', 'vehicle-card', 'current-address-card',
+    'emergency-contact-card', 'current-employment-card',
+    'primary-additional-income-card', 'primary-income-documents-card',
+    'household-occupants-card', 'pets-card'
+  ];
+  var firstPageButton = document.getElementById('btn1a');
+  orderedCardIds.forEach(function(id) {
+    var card = document.getElementById(id);
+    if (card) personalPage.insertBefore(card, firstPageButton);
+  });
   var page1Button = document.getElementById('btn1a');
   page1Button.textContent = 'Next: Income & Background →';
   page1Button.onclick = goPhase1Income;
