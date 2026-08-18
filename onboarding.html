@@ -75,6 +75,9 @@
     .occupant-label{font-size:15px;font-weight:900;color:#3346B8;letter-spacing:.1px;margin-bottom:15px;padding:9px 11px;background:#E9EDFF;border-radius:9px}
     .pet-block{background:#F8F9FF;border-radius:16px;padding:18px;margin-top:16px;border:2px solid #DDE4FF}
     .pet-label{font-size:15px;font-weight:900;color:#3346B8;letter-spacing:.1px;margin-bottom:14px}
+    .dynamic-block-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;padding:9px 11px;background:#E9EDFF;border-radius:9px}
+    .dynamic-block-header .occupant-label,.dynamic-block-header .pet-label{margin:0;padding:0;background:transparent}
+    .remove-entry-btn{border:0;border-radius:9px;background:#FEE2E2;color:#DC2626;padding:8px 10px;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap}
 
     /* Disclosures */
     .disclosure-box{background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;color:#1A1D2E;line-height:1.75}
@@ -377,7 +380,7 @@
         <div id="pet-fields" style="display:none">
           <div id="pets-container">
             <div class="pet-block" id="pet-0">
-              <div class="pet-label">Pet 1</div>
+              <div class="dynamic-block-header"><div class="pet-label pet-entry-label">Pet 1</div><button type="button" class="remove-entry-btn" onclick="removePet(0)">Remove</button></div>
               <div class="field"><label>Type</label><input type="text" id="pet0-type" placeholder="Dog, Cat, Bird…"/></div>
               <div class="field-row">
                 <div class="field"><label>Breed</label><input type="text" id="pet0-breed" placeholder="Labrador"/></div>
@@ -1099,8 +1102,9 @@ function addPet() {
   var idx = petCount;
   var div = document.createElement('div');
   div.className = 'pet-block';
+  div.id = 'pet-' + idx;
   div.innerHTML =
-    '<div class="pet-label">Pet ' + (idx + 1) + '</div>' +
+    '<div class="dynamic-block-header"><div class="pet-label pet-entry-label">Pet ' + (idx + 1) + '</div><button type="button" class="remove-entry-btn" onclick="removePet(' + idx + ')">Remove</button></div>' +
     '<div class="field"><label>Type</label><input type="text" id="pet' + idx + '-type" placeholder="Dog, Cat…"/></div>' +
     '<div class="field-row">' +
       '<div class="field"><label>Breed</label><input type="text" id="pet' + idx + '-breed"/></div>' +
@@ -1108,6 +1112,14 @@ function addPet() {
     '</div>';
   c.appendChild(div);
   petCount++;
+}
+
+function removePet(idx) {
+  document.getElementById('pet-' + idx)?.remove();
+  Array.from(document.querySelectorAll('#pets-container .pet-block')).forEach(function(block, position) {
+    var label = block.querySelector('.pet-entry-label');
+    if (label) label.textContent = 'Pet ' + (position + 1);
+  });
 }
 
 function collectPets() {
@@ -1133,24 +1145,46 @@ function updateSigPreview() {
 }
 
 // ── Additional income sources ─────────────────────────────────
+function incomeSourceOptions() {
+  return '<option value="">Select income source</option>' +
+    '<option value="part_time_job">Part-time job</option>' +
+    '<option value="self_employment">Self-employment / freelance</option>' +
+    '<option value="benefits">Benefits / government assistance</option>' +
+    '<option value="child_support_alimony">Child support / alimony</option>' +
+    '<option value="pension_retirement">Pension / retirement</option>' +
+    '<option value="investment_rental">Investment / rental income</option>' +
+    '<option value="other">Other</option>';
+}
+
 function addIncomeSource() {
   var c   = document.getElementById('extra-income-container');
   var idx = incomeRowCount++;
   var div = document.createElement('div');
   div.className = 'occupant-block';
+  div.id = 'income-block-' + idx;
   div.innerHTML =
-    '<div class="occupant-label">Additional Income Source ' + (idx + 1) + '</div>' +
+    '<div class="dynamic-block-header"><div class="occupant-label income-entry-label">Additional Income Source ' + (idx + 1) + '</div><button type="button" class="remove-entry-btn" onclick="removeIncomeSource(' + idx + ')">Remove</button></div>' +
     '<div class="field-row">' +
-      '<div class="field"><label>Source</label><input type="text" id="income' + idx + '-src" placeholder="Part-time job, Freelance…"/></div>' +
+      '<div class="field"><label>Source</label><select id="income' + idx + '-src">' + incomeSourceOptions() + '</select></div>' +
       '<div class="field"><label>Monthly (USD)</label><input type="number" id="income' + idx + '-amt" placeholder="500" inputmode="decimal"/></div>' +
     '</div>' +
+    '<div class="field"><label>Company / Organization Name</label><input id="income' + idx + '-company" placeholder="Company or organization"/></div>' +
     '<div class="field-row"><div class="field"><label>Contact First Name</label><input id="income' + idx + '-contact-first" placeholder="First"/></div><div class="field"><label>Contact Last Name</label><input id="income' + idx + '-contact-last" placeholder="Last"/></div></div>' +
     '<div class="field"><label>Contact Phone</label><input type="tel" id="income' + idx + '-contact-phone" placeholder="(555) 123-4567"/></div>' +
     '<div class="field"><label>Source Address</label><input id="income' + idx + '-street" placeholder="Street address"/></div>' +
-    '<div class="field-row"><div class="field"><label>City</label><input id="income' + idx + '-city"/></div><div class="field"><label>State</label><input id="income' + idx + '-state"/></div></div>' +
+    '<div class="field-row"><div class="field"><label>City</label><input id="income' + idx + '-city"/></div><div class="field"><label>State</label><select id="income' + idx + '-state"><option value="">Select state</option></select></div></div>' +
     '<div class="field"><label>ZIP Code</label><input id="income' + idx + '-zip" inputmode="numeric"/></div>' +
     '<div class="doc-upload-row" onclick="document.getElementById(\'income' + idx + '-file\').click()"><div class="doc-upload-icon">📄</div><div class="doc-upload-label">Income Support Document</div><div class="doc-upload-status" id="income' + idx + '-file-status">Tap to add</div><input type="file" class="doc-upload-input" id="income' + idx + '-file" accept=".pdf,.jpg,.jpeg,.png" onchange="markDynamicFile(\'income' + idx + '-file\',\'income' + idx + '-file-status\')"/></div>';
   c.appendChild(div);
+  populateVehicleStateSelect(document.getElementById('income' + idx + '-state'));
+}
+
+function removeIncomeSource(idx) {
+  document.getElementById('income-block-' + idx)?.remove();
+  Array.from(document.querySelectorAll('#extra-income-container .occupant-block')).forEach(function(block, position) {
+    var label = block.querySelector('.income-entry-label');
+    if (label) label.textContent = 'Additional Income Source ' + (position + 1);
+  });
 }
 
 function collectAdditionalIncome() {
@@ -1160,6 +1194,7 @@ function collectAdditionalIncome() {
     var amt = document.getElementById('income' + i + '-amt')?.value;
     if (src) list.push({
       source: src, amount: Number(amt) || 0,
+      company_name: (document.getElementById('income' + i + '-company')?.value || '').trim(),
       contact: {
         first_name: (document.getElementById('income' + i + '-contact-first')?.value || '').trim(),
         last_name: (document.getElementById('income' + i + '-contact-last')?.value || '').trim(),
@@ -1184,15 +1219,27 @@ function addOccupantIncomeSource(occupantIndex) {
   var div = document.createElement('div');
   div.className = 'occupant-block';
   var p = 'occ' + occupantIndex + '-income' + idx;
+  div.id = p + '-block';
   div.innerHTML =
-    '<div class="field-row"><div class="field"><label>Source</label><input id="' + p + '-source" placeholder="Part-time work, benefits…"/></div><div class="field"><label>Monthly Income</label><input type="number" min="0" id="' + p + '-amount"/></div></div>' +
+    '<div class="dynamic-block-header"><div class="occupant-label occupant-income-entry-label">Additional Income Source ' + (idx + 1) + '</div><button type="button" class="remove-entry-btn" onclick="removeOccupantIncomeSource(' + occupantIndex + ',' + idx + ')">Remove</button></div>' +
+    '<div class="field-row"><div class="field"><label>Source</label><select id="' + p + '-source">' + incomeSourceOptions() + '</select></div><div class="field"><label>Monthly Income</label><input type="number" min="0" id="' + p + '-amount"/></div></div>' +
+    '<div class="field"><label>Company / Organization Name</label><input id="' + p + '-company" placeholder="Company or organization"/></div>' +
     '<div class="field-row"><div class="field"><label>Contact First Name</label><input id="' + p + '-first"/></div><div class="field"><label>Contact Last Name</label><input id="' + p + '-last"/></div></div>' +
     '<div class="field"><label>Contact Phone</label><input type="tel" id="' + p + '-phone"/></div>' +
     '<div class="field"><label>Source Address</label><input id="' + p + '-street" placeholder="Street address"/></div>' +
-    '<div class="field-row"><div class="field"><label>City</label><input id="' + p + '-city"/></div><div class="field"><label>State</label><input id="' + p + '-state"/></div></div>' +
+    '<div class="field-row"><div class="field"><label>City</label><input id="' + p + '-city"/></div><div class="field"><label>State</label><select id="' + p + '-state"><option value="">Select state</option></select></div></div>' +
     '<div class="field"><label>ZIP Code</label><input id="' + p + '-zip" inputmode="numeric"/></div>' +
     '<div class="doc-upload-row" onclick="document.getElementById(\'' + p + '-file\').click()"><div class="doc-upload-icon">📄</div><div class="doc-upload-label">Income Support Document</div><div class="doc-upload-status" id="' + p + '-status">Tap to add</div><input type="file" class="doc-upload-input" id="' + p + '-file" accept=".pdf,.jpg,.jpeg,.png" onchange="markDynamicFile(\'' + p + '-file\',\'' + p + '-status\')"/></div>';
   box.appendChild(div);
+  populateVehicleStateSelect(document.getElementById(p + '-state'));
+}
+
+function removeOccupantIncomeSource(occupantIndex, idx) {
+  document.getElementById('occ' + occupantIndex + '-income' + idx + '-block')?.remove();
+  Array.from(document.querySelectorAll('#occ' + occupantIndex + '-extra-income .occupant-block')).forEach(function(block, position) {
+    var label = block.querySelector('.occupant-income-entry-label');
+    if (label) label.textContent = 'Additional Income Source ' + (position + 1);
+  });
 }
 
 function collectOccupantAdditionalIncome(occupantIndex) {
@@ -1204,6 +1251,7 @@ function collectOccupantAdditionalIncome(occupantIndex) {
     if (!source) continue;
     list.push({
       source: source, amount: Number(document.getElementById(p + '-amount')?.value || 0) || 0,
+      company_name: (document.getElementById(p + '-company')?.value || '').trim(),
       contact: {
         first_name: (document.getElementById(p + '-first')?.value || '').trim(),
         last_name: (document.getElementById(p + '-last')?.value || '').trim(),
