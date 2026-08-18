@@ -582,11 +582,11 @@
 
     <!-- Phase 1 Complete -->
     <div id="p1-complete" class="success-view">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">Thank You — Stage 1 Is Complete!</div>
-      <div class="success-body">Your tenant onboarding application has been submitted to the landlord for review.</div>
+      <div class="success-icon">✓</div>
+      <div class="success-title">Application Successfully Submitted</div>
+      <div class="success-body">You're all set for now—no further action is required at this time.</div>
       <div class="success-detail" id="p1-summary"></div>
-      <p style="font-size:13px;color:#6B7280;line-height:1.7">If your application is approved, you will receive another secure notification to complete Stage 2: purchase or confirm liability insurance, set up rent payments, and review and sign the lease.</p>
+      <p style="font-size:13px;color:#6B7280;line-height:1.7"><span id="p1-landlord-name">Your landlord</span> will review your application. You will receive a notification when there is an update or if any additional information is needed.</p>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════
@@ -923,6 +923,12 @@ function formatPhoneInput(input) {
   if (digits.length < 4) input.value = digits;
   else if (digits.length < 7) input.value = '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
   else input.value = '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+}
+
+function updatePhase1CompletionMessage() {
+  var landlordName = String(inviteInfo?.landlordName || '').trim();
+  var nameElement = document.getElementById('p1-landlord-name');
+  if (nameElement) nameElement.textContent = landlordName || 'Your landlord';
 }
 
 function togglePrimaryEmployment() {
@@ -1490,6 +1496,7 @@ async function loadPhase1() {
       return;
     }
     if (json.applicationSubmitted) {
+      updatePhase1CompletionMessage();
       showStep('p1-complete');
       document.getElementById('loading').style.display = 'none';
       document.getElementById('main').style.display = '';
@@ -1804,6 +1811,7 @@ async function completePhase1() {
     if (json.error) throw new Error(json.error);
 
     // Show Phase 1 success
+    updatePhase1CompletionMessage();
     var summaryEl = document.getElementById('p1-summary');
     if (summaryEl && json.summary) {
       summaryEl.innerHTML =
