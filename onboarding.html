@@ -516,30 +516,8 @@
       <button class="btn btn-secondary" onclick="showStep('2a')">← Back</button>
     </div>
 
-    <!-- STEP 3 — Screening & Identity -->
+    <!-- STEP 3 — Credit & Background Screening -->
     <div id="step3" style="display:none">
-
-      <!-- Identity Verification -->
-      <div class="card" id="verify-card">
-        <div class="card-title">Identity Verification</div>
-        <div class="verify-info">
-          <div class="verify-icon-wrap">🪪</div>
-          <div class="verify-heading">Verify Your Identity</div>
-          <div class="verify-subtext">Quick 2-minute photo ID check. Have your driver's license or passport ready.</div>
-          <div class="verify-items">
-            <div class="verify-item">📄 &nbsp;Government-issued ID (driver's license or passport)</div>
-            <div class="verify-item">🤳 &nbsp;A quick selfie to match your ID</div>
-            <div class="verify-item">💡 &nbsp;Good lighting and a steady hand</div>
-          </div>
-        </div>
-        <div id="verify-done" class="screening-verified" style="display:none">
-          <div class="sv-icon">✅</div>
-          <div class="sv-text">Identity verified successfully!</div>
-        </div>
-        <div id="err3-verify" class="err-msg"></div>
-        <button class="btn btn-primary" id="btn3-verify" onclick="startVerification()" style="margin-top:8px">Verify My Identity →</button>
-        <div class="secure-note" style="margin-top:8px">🔒 Powered by Stripe Identity — documents never stored by your landlord.</div>
-      </div>
 
       <!-- Credit & Background Check -->
       <div class="card" id="screening-card">
@@ -723,7 +701,6 @@ var stripe          = null;
 var elements        = null;
 var inviteInfo      = {};
 var selectedPayMethod = 'bank';
-var identityDone    = false;
 var petCount        = 1;
 var incomeRowCount  = 0;
 var occupantIncomeCounts = {};
@@ -1746,51 +1723,9 @@ async function saveStep2() {
   }
 }
 
-// ── STEP 3: Identity Verification ────────────────────────────
-async function startVerification() {
-  if (busy) return;
-  setErr('err3-verify', '');
-  busy = true;
-  setBtn('btn3-verify', true, '<span class="spinner"></span> Preparing…');
-
-  try {
-    var res  = await fetch(API_BASE + '?action=create-verification-session', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ token: token, email: v('email') }),
-    });
-    var json = await res.json();
-    if (json.noVerification) {
-      identityDone = true;
-      document.getElementById('verify-card').style.display = 'none';
-      setBtn('btn3-verify', false, 'Verify My Identity →');
-      busy = false; return;
-    }
-    if (json.error) throw new Error(json.error);
-    if (!stripe) throw new Error('Stripe not initialized.');
-
-    setBtn('btn3-verify', false, 'Verify My Identity →');
-    busy = false;
-
-    var modal = await stripe.verifyIdentity(json.clientSecret);
-    if (modal.error) { setErr('err3-verify', modal.error.message); return; }
-
-    identityDone = true;
-    document.getElementById('btn3-verify').style.display = 'none';
-    document.getElementById('verify-done').style.display = '';
-  } catch (err) {
-    setErr('err3-verify', err.message || 'Could not start verification.');
-    setBtn('btn3-verify', false, 'Verify My Identity →');
-    busy = false;
-  }
-}
-
 // ── COMPLETE PHASE 1 ─────────────────────────────────────────
 async function completePhase1() {
   setErr('err3-screening', '');
-  if (!chk('screening-authorized') && !identityDone) {
-    setErr('err3-screening', 'Please verify your identity and authorize your screening before submitting.');
-    return;
-  }
   if (!chk('screening-authorized')) {
     setErr('err3-screening', 'Please check the box confirming you have authorized your screening.');
     return;
@@ -1804,7 +1739,6 @@ async function completePhase1() {
       body: JSON.stringify({
         token,
         screening_authorized: true,
-        identity_done: identityDone,
       }),
     });
     var json = await res.json();
