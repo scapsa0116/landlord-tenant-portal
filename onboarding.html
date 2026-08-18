@@ -473,7 +473,7 @@
           </div>
           <div class="field"><label for="prev-ll-last">Last Name</label><input id="prev-ll-last" type="text" placeholder="Smith"/></div>
         </div>
-        <div class="field"><label for="prev-ll-phone">Phone Number</label><input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel"/></div></div>
+        <div class="field"><label for="prev-ll-phone">Phone Number</label><input id="prev-ll-phone" type="tel" placeholder="(555) 123-4567" inputmode="tel" maxlength="14" oninput="formatPhoneInput(this)"/></div></div>
       </div>
       <button class="btn btn-primary" id="btn2a" onclick="goStep2b()">Next: Documents →</button>
       <button class="btn btn-secondary" onclick="showStep('1d')">← Back</button>
@@ -915,6 +915,16 @@ function populateVehicleStateSelect(select) {
   });
 }
 
+function formatPhoneInput(input) {
+  if (!input) return;
+  var digits = String(input.value || '').replace(/\D/g, '');
+  if (digits.length > 10 && digits.charAt(0) === '1') digits = digits.slice(1);
+  digits = digits.slice(0, 10);
+  if (digits.length < 4) input.value = digits;
+  else if (digits.length < 7) input.value = '(' + digits.slice(0, 3) + ') ' + digits.slice(3);
+  else input.value = '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+}
+
 function togglePrimaryEmployment() {
   var status = v('occupation-status');
   var employed = ['full_time','part_time','self_employed'].includes(status);
@@ -993,7 +1003,7 @@ function updateOccupants() {
         '<div class="field"><label>Phone Number</label><input type="tel" id="occ' + idx + '-supervisor-phone"/></div>' +
         '<div class="occupant-label" style="margin-top:16px">Previous Landlord (optional)</div>' +
         '<div class="field-row"><div class="field"><label>First Name</label><input id="occ' + idx + '-landlord-first"/></div><div class="field"><label>Last Name</label><input id="occ' + idx + '-landlord-last"/></div></div>' +
-        '<div class="field"><label>Phone Number</label><input type="tel" id="occ' + idx + '-landlord-phone"/></div>' +
+        '<div class="field"><label>Phone Number</label><input type="tel" id="occ' + idx + '-landlord-phone" placeholder="(555) 123-4567" inputmode="tel" maxlength="14" oninput="formatPhoneInput(this)"/></div>' +
         '<div class="doc-upload-row" onclick="document.getElementById(\'occ' + idx + '-income-file\').click()"><div class="doc-upload-icon">📄</div><div class="doc-upload-label">Main Income Support Document</div><div class="doc-upload-status" id="occ' + idx + '-income-status">Tap to add</div><input type="file" class="doc-upload-input" id="occ' + idx + '-income-file" accept=".pdf,.jpg,.jpeg,.png" onchange="markDynamicFile(\'occ' + idx + '-income-file\',\'occ' + idx + '-income-status\')"/></div>' +
         '</div>' +
         '<div id="occ' + idx + '-student-fields" style="display:none">' +
@@ -1170,7 +1180,7 @@ function addIncomeSource() {
     '</div>' +
     '<div class="field"><label>Company / Organization Name</label><input id="income' + idx + '-company" placeholder="Company or organization"/></div>' +
     '<div class="field-row"><div class="field"><label>Contact First Name</label><input id="income' + idx + '-contact-first" placeholder="First"/></div><div class="field"><label>Contact Last Name</label><input id="income' + idx + '-contact-last" placeholder="Last"/></div></div>' +
-    '<div class="field"><label>Contact Phone</label><input type="tel" id="income' + idx + '-contact-phone" placeholder="(555) 123-4567"/></div>' +
+    '<div class="field"><label>Contact Phone</label><input type="tel" id="income' + idx + '-contact-phone" placeholder="(555) 123-4567" inputmode="tel" maxlength="14" oninput="formatPhoneInput(this)"/></div>' +
     '<div class="field"><label>Source Address</label><input id="income' + idx + '-street" placeholder="Street address"/></div>' +
     '<div class="field-row"><div class="field"><label>City</label><input id="income' + idx + '-city"/></div><div class="field"><label>State</label><select id="income' + idx + '-state"><option value="">Select state</option></select></div></div>' +
     '<div class="field"><label>ZIP Code</label><input id="income' + idx + '-zip" inputmode="numeric"/></div>' +
@@ -1225,7 +1235,7 @@ function addOccupantIncomeSource(occupantIndex) {
     '<div class="field-row"><div class="field"><label>Source</label><select id="' + p + '-source">' + incomeSourceOptions() + '</select></div><div class="field"><label>Monthly Income</label><input type="number" min="0" id="' + p + '-amount"/></div></div>' +
     '<div class="field"><label>Company / Organization Name</label><input id="' + p + '-company" placeholder="Company or organization"/></div>' +
     '<div class="field-row"><div class="field"><label>Contact First Name</label><input id="' + p + '-first"/></div><div class="field"><label>Contact Last Name</label><input id="' + p + '-last"/></div></div>' +
-    '<div class="field"><label>Contact Phone</label><input type="tel" id="' + p + '-phone"/></div>' +
+    '<div class="field"><label>Contact Phone</label><input type="tel" id="' + p + '-phone" placeholder="(555) 123-4567" inputmode="tel" maxlength="14" oninput="formatPhoneInput(this)"/></div>' +
     '<div class="field"><label>Source Address</label><input id="' + p + '-street" placeholder="Street address"/></div>' +
     '<div class="field-row"><div class="field"><label>City</label><input id="' + p + '-city"/></div><div class="field"><label>State</label><select id="' + p + '-state"><option value="">Select state</option></select></div></div>' +
     '<div class="field"><label>ZIP Code</label><input id="' + p + '-zip" inputmode="numeric"/></div>' +
