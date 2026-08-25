@@ -300,6 +300,27 @@
         <div class="field-row"><div class="field"><label for="vehicle-plate">License Plate</label><input id="vehicle-plate" placeholder="ABC 123"/></div><div class="field"><label for="vehicle-state">Plate State</label><select id="vehicle-state" class="vehicle-state-select"><option value="">Select state</option></select></div></div>
         <div id="err1a" class="err-msg"></div>
       </div>
+      <div class="card" id="rental-terms-card">
+        <div class="card-title">Rental Terms</div>
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px;line-height:1.6">Confirm the agreed rental period and move-in charge for this unit.</p>
+        <div class="field-row">
+          <div class="field"><label for="rental-start-date">Renting From</label><input id="rental-start-date" type="date"/></div>
+          <div class="field"><label for="rental-end-date">Renting Until</label><input id="rental-end-date" type="date"/></div>
+        </div>
+        <div class="field">
+          <label for="move-in-charge-type">Move-in Charge</label>
+          <select id="move-in-charge-type" onchange="toggleMoveInCharge()">
+            <option value="">Select an option</option>
+            <option value="one_month_deposit">Security deposit equal to one month of rent</option>
+            <option value="one_time_fee">One-time move-in fee</option>
+          </select>
+        </div>
+        <div id="deposit-amount-note" class="field-hint" style="display:none;margin:-8px 0 16px"></div>
+        <div class="field" id="one-time-fee-field" style="display:none">
+          <label for="one-time-fee-amount">One-time Fee Amount (USD)</label>
+          <input id="one-time-fee-amount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Enter the agreed amount"/>
+        </div>
+      </div>
       <button class="btn btn-primary" id="btn1a" onclick="goStep1b()">Next: Address →</button>
       <div class="secure-note">🔒 Your information is encrypted and stored securely.</div>
     </div>
@@ -908,6 +929,17 @@ function updatePhase1CompletionMessage() {
   if (nameElement) nameElement.textContent = landlordName || 'Your landlord';
 }
 
+function toggleMoveInCharge() {
+  var chargeType = v('move-in-charge-type');
+  var feeField = document.getElementById('one-time-fee-field');
+  var depositNote = document.getElementById('deposit-amount-note');
+  if (feeField) feeField.style.display = chargeType === 'one_time_fee' ? '' : 'none';
+  if (depositNote) {
+    depositNote.style.display = chargeType === 'one_month_deposit' ? '' : 'none';
+    depositNote.textContent = 'Security deposit: $' + Number(inviteInfo?.rent || 0).toLocaleString() + ' (one month of rent)';
+  }
+}
+
 function togglePrimaryEmployment() {
   var status = v('occupation-status');
   var employed = ['full_time','part_time','self_employed'].includes(status);
@@ -1316,7 +1348,7 @@ function configureThreePagePhase1() {
   // Keep related questions in a predictable visual sequence. In particular,
   // additional income must appear before the household/occupant questionnaire.
   var orderedCardIds = [
-    'personal-information-card', 'vehicle-card', 'current-address-card',
+    'personal-information-card', 'rental-terms-card', 'vehicle-card', 'current-address-card',
     'emergency-contact-card', 'current-employment-card',
     'previous-landlord-card', 'primary-additional-income-card', 'primary-income-documents-card',
     'household-occupants-card', 'pets-card'
@@ -1331,7 +1363,7 @@ function configureThreePagePhase1() {
   applicantGroup.className = 'applicant-details-group';
   personalPage.insertBefore(applicantGroup, document.getElementById('personal-information-card'));
   [
-    'personal-information-card', 'vehicle-card', 'current-address-card',
+    'personal-information-card', 'rental-terms-card', 'vehicle-card', 'current-address-card',
     'emergency-contact-card', 'current-employment-card',
     'previous-landlord-card', 'primary-additional-income-card'
   ].forEach(function(id) {
@@ -1365,6 +1397,10 @@ function goPhase1Income() {
   if (!v('email') || !v('email').includes('@') || !v('phone')) return setErr('err1a', 'Enter a valid email and phone number.');
   if (!v('identity-type')) return setErr('err1a', 'Select an identity document type.');
   if (!document.getElementById('upload-identity')?.files?.[0]) return setErr('err1a', 'Add a photo or file of your identity document.');
+  if (!v('rental-start-date') || !v('rental-end-date')) return setErr('err1a', 'Select the beginning and ending dates for the rental period.');
+  if (v('rental-end-date') <= v('rental-start-date')) return setErr('err1a', 'The rental end date must be after the start date.');
+  if (!v('move-in-charge-type')) return setErr('err1a', 'Select the agreed security deposit or one-time move-in fee.');
+  if (v('move-in-charge-type') === 'one_time_fee' && Number(v('one-time-fee-amount')) <= 0) return setErr('err1a', 'Enter the agreed one-time move-in fee amount.');
   if (!v('addr-street') || !v('addr-city') || !v('addr-state') || !v('addr-zip')) return setErr('err1a', 'Complete your current address.');
   var primaryOccupation = v('occupation-status');
   if (!primaryOccupation) return setErr('err1a', 'Select your occupation.');
@@ -1490,6 +1526,13 @@ async function loadPhase1() {
 
     // Init Stripe
     if (json.stripePublishableKey) stripe = Stripe(json.stripePublishableKey);
+
+    var rentalTerms = json.prefill?.rental_terms || {};
+    document.getElementById('rental-start-date').value = rentalTerms.start_date || json.expectedMoveInDate || '';
+    document.getElementById('rental-end-date').value = rentalTerms.end_date || '';
+    document.getElementById('move-in-charge-type').value = rentalTerms.charge_type || '';
+    document.getElementById('one-time-fee-amount').value = rentalTerms.charge_type === 'one_time_fee' && rentalTerms.charge_amount ? rentalTerms.charge_amount : '';
+    toggleMoveInCharge();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('main').style.display    = '';
@@ -1618,6 +1661,14 @@ async function saveStep1(advance) {
         date_of_birth:       dob,
         email:               v('email'),
         phone:               v('phone'),
+        rental_terms: {
+          start_date: v('rental-start-date'),
+          end_date: v('rental-end-date'),
+          charge_type: v('move-in-charge-type'),
+          charge_amount: v('move-in-charge-type') === 'one_month_deposit'
+            ? Number(inviteInfo?.rent || 0)
+            : (Number(v('one-time-fee-amount')) || 0),
+        },
         drivers_license:     null,
         identification: {
           type: v('identity-type'), number: null, state: v('drivers-license-state'),
